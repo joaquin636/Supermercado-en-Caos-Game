@@ -1,188 +1,66 @@
 # 🛒 Supermercado en Caos
 
-## Descripción
+## 📝 Descripción
 
-**Supermercado en Caos** es un videojuego 2D desarrollado como proyecto final
-del curso de Programación Orientada a Objetos.
+**Supermercado en Caos** es un videojuego 2D desarrollado en Java (Swing/Java2D) como proyecto final del curso de Programación Orientada a Objetos (POO) de la Universidad Peruana Cayetano Heredia.
 
-El jugador asumirá el papel de un trabajador de supermercado que deberá
-organizar productos que se encuentran fuera de lugar antes de que termine
-el tiempo.
-
-Durante la partida tendrá que recorrer diferentes zonas del supermercado,
-recoger productos, colocarlos en los estantes correspondientes y evitar
-obstáculos como carritos, clientes, cajas abandonadas y derrames.
-
-A medida que se avanza de nivel, aumenta la cantidad de productos,
-los obstáculos y la dificultad.
+El jugador asume el papel de un repositor de supermercado que debe organizar productos que se encuentran esparcidos por el suelo antes de que termine el tiempo. Durante la partida, tendrá que recorrer los pasillos, recoger productos (uno a la vez), colocarlos en los estantes correspondientes y evitar chocar con clientes apurados y obstáculos sólidos.
 
 ---
 
-##  Objetivo del juego
+## 🎮 Controles
 
-El objetivo principal es organizar la mayor cantidad de productos posible
-antes de que el tiempo llegue a cero.
-
-El jugador obtiene puntos por colocar correctamente los productos y puede
-perder puntos o tiempo al cometer errores o colisionar con determinados
-obstáculos.
+- **WASD / Flechas:** Mover al personaje.
+- **Tecla E:** Recoger un producto del suelo o entregarlo en un estante.
+- **Tecla P / ESC:** Pausar o reanudar la partida.
 
 ---
 
-##  Mecánicas principales
+## 🎯 Objetivo del juego
 
-- Movimiento del jugador por el supermercado.
-- Recolección de productos.
-- Identificación del estante correcto.
-- Colocación de productos.
-- Sistema de puntuación.
-- Temporizador.
-- Colisiones con obstáculos.
-- Personajes secundarios.
-- Diferentes niveles de dificultad.
-- Pantalla de pausa.
-- Pantalla de Game Over.
-- Pantalla de victoria.
+El objetivo principal es organizar todos los productos en sus estantes correctos antes de que el temporizador llegue a cero. 
+
+El jugador obtiene puntos por colocar correctamente los productos, pero perderá valiosos segundos de su tiempo si colisiona con los clientes que recorren la tienda.
 
 ---
 
-##  Personaje principal
+## 📦 Productos y Categorías (Implementación Actual)
 
-El personaje principal será un trabajador del supermercado.
-
-### Acciones
-
-- Caminar.
-- Recoger productos.
-- Transportar productos.
-- Colocar productos en estantes.
-- Evitar obstáculos.
-
----
-
-##  Personajes secundarios
-
-El supermercado contará con diferentes personajes secundarios.
-
-### Cliente
-
-Camina por los pasillos y puede convertirse en un obstáculo para el jugador.
-
-### Trabajador
-
-Puede desplazarse dentro del supermercado realizando diferentes acciones.
-
-### Supervisor
-
-Puede aparecer en determinados niveles y asignar objetivos o indicar
-el progreso del jugador.
-
----
-
-##  Productos
-
-Los productos estarán divididos por categorías.
-
-Ejemplos:
+El juego cuenta actualmente con 6 productos divididos en 3 categorías clave. El jugador deberá identificar el estante correcto para cada uno:
 
 | Categoría | Productos |
 |---|---|
-| Bebidas | Agua, gaseosa, jugo |
-| Frutas | Manzana, plátano, naranja |
-| Limpieza | Detergente, jabón |
-| Snacks | Galletas, papas |
-| Lácteos | Leche, yogurt |
-
-Cada producto tendrá asociado un estante específico.
-
-El jugador deberá identificar dónde corresponde colocar cada producto.
+| **Frutas** | Manzana, Plátano |
+| **Limpieza** | Detergente, Jabón |
+| **Lácteos** | Leche, Yogur |
 
 ---
 
-##  Obstáculos
+## 🚧 Obstáculos y Personajes
 
-Durante la partida pueden aparecer diferentes obstáculos:
-
-- Carritos de supermercado.
-- Clientes caminando.
-- Cajas en los pasillos.
-- Productos caídos.
-- Derrames.
-- Obstáculos móviles.
-
-Las colisiones pueden provocar una reducción de puntos o una penalización
-de tiempo.
+- **El Repositor (Jugador):** Personaje principal. Solo puede cargar un producto a la vez.
+- **Clientes:** Personajes secundarios que patrullan la tienda. Si el jugador choca con ellos, sufrirá una penalización de tiempo.
+- **Cajas y Estantes:** Obstáculos sólidos que bloquean el paso y obligan al jugador a buscar rutas alternas.
+- *(En desarrollo para la versión final: Supervisores, derrames en el piso y carritos descontrolados).*
 
 ---
 
-#  Niveles
+## 🏆 Sistema de Puntuación y Tiempo
 
-## Nivel 1 — Primer día
+Para el **Nivel 1 (Turno de apertura)**, las reglas de puntuación y tiempo son las siguientes:
 
-Introducción a las mecánicas.
-
-- Pocos productos.
-- Pocos obstáculos.
-- Clientes lentos.
-- Tiempo amplio.
-
-## Nivel 2 — Hora punta
-
-La cantidad de clientes aumenta.
-
-- Más productos.
-- Más obstáculos.
-- Clientes más rápidos.
-- Menor tiempo disponible.
-
-## Nivel 3 — Supermercado en Caos
-
-Máxima dificultad.
-
-- Muchos productos fuera de lugar.
-- Gran cantidad de clientes.
-- Obstáculos móviles.
-- Menor tiempo.
-- Mayor puntuación necesaria para ganar.
+- **Tiempo inicial:** 180 segundos (3 minutos).
+- **Producto colocado correctamente:** +100 puntos.
+- **Chocar con un cliente:** -5 segundos de penalización (otorga una breve inmunidad tras el choque).
+- **Condición de Victoria:** Entregar los 6 productos antes de que el reloj llegue a 00:00.
 
 ---
 
-# 🏆 Sistema de puntuación
+## 💻 Programación Orientada a Objetos (POO)
 
-Ejemplo inicial:
+El proyecto está diseñado bajo una arquitectura limpia que demuestra el dominio de los siguientes pilares de la POO:
 
-| Acción | Puntos |
-|---|---:|
-| Producto colocado correctamente | +100 |
-| Producto incorrecto | -25 |
-| Chocar con obstáculo | -5 |
-| Completar el nivel | +500 |
-| Tiempo restante | Bonificación |
-
-La puntuación final puede utilizarse para crear una tabla de récords.
-
----
-
-# ⏱️ Sistema de tiempo
-
-Cada nivel tendrá un tiempo máximo.
-
-Ejemplo:
-
-Nivel 1 → 120 segundos  
-Nivel 2 → 90 segundos  
-Nivel 3 → 60 segundos  
-
-Cuando el tiempo llegue a cero se evaluará si el jugador consiguió
-el objetivo mínimo del nivel.
-
----
-
-#  Programación Orientada a Objetos
-
-El proyecto utilizará los principales conceptos de POO.
-
-## Encapsulamiento
-
-Los atributos importantes de las clases serán privados y se accederá
-a ellos mediante métodos controlados.
+- **Abstracción y Herencia:** Clases abstractas como `Personaje` (de la cual heredan `Jugador` y `Cliente`) y `Obstaculo` (padre de `Estante`).
+- **Polimorfismo:** El bucle de juego actualiza a todas las entidades (movimiento y colisiones) mediante llamadas polimórficas al método `update()`.
+- **Encapsulamiento:** Protección de atributos críticos (puntos, tiempo, coordenadas) mediante métodos de acceso controlados.
+- **Asociación, Agregación y Composición:** Evidenciadas en la relación del jugador con los productos, los estantes que agrupan los objetos entregados, y el `Juego` que compone y gestiona el `Nivel` completo.
