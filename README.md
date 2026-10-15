@@ -155,7 +155,7 @@ Ejemplo inicial:
 |---|---:|
 | Producto colocado correctamente | +100 |
 | Producto incorrecto | -25 |
-| Chocar con obstáculo | -10 |
+| Chocar con obstáculo | -5 |
 | Completar el nivel | +500 |
 | Tiempo restante | Bonificación |
 
