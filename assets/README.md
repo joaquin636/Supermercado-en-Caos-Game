@@ -1,0 +1,1 @@
+Arte original definido en GamePanel.java. Atlas de referencia generado a partir del render del juego; no contiene sprites descargados. Sin dependencia de archivos para jugar. Permiso de uso y modificacion de estos recursos originales dentro del proyecto academico.

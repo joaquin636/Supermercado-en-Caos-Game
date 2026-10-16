@@ -31,7 +31,7 @@ public final class PruebasJuego {
         System.setProperty("java.awt.headless", "true");
         movimiento(); entregas(); estados(); recorridoCompleto();
         SwingUtilities.invokeAndWait(() -> {
-            try { teclado(); renderizar(args.length == 0 ? "docs/capturas" : args[0]); }
+            try { menu(); teclado(); renderizar(args.length == 0 ? "docs/capturas" : args[0]); }
             catch (Exception e) { throw new RuntimeException(e); }
         });
         System.out.println("OK: " + comprobaciones + " comprobaciones. Movimiento, colisiones, entrega, partida, teclado y render.");
@@ -168,6 +168,16 @@ public final class PruebasJuego {
         pulsar(panel,KeyEvent.VK_P,false);panel.avanzarFotograma(Personaje.PASO);
         verificar(j.getEstado()==Juego.Estado.JUGANDO,"P reanuda");
     }
+    private static void menu() {
+        Juego j=new Juego();GamePanel p=new GamePanel(j,false);
+        pulsar(p,KeyEvent.VK_DOWN,false);p.avanzarFotograma(.02);
+        pulsar(p,KeyEvent.VK_ENTER,false);p.avanzarFotograma(.02);
+        verificar(j.getEstado()==Juego.Estado.MENU,"Instrucciones no inicia la partida");
+        pulsar(p,KeyEvent.VK_ENTER,true);pulsar(p,KeyEvent.VK_ENTER,false);p.avanzarFotograma(.02);
+        pulsar(p,KeyEvent.VK_UP,false);p.avanzarFotograma(.02);
+        pulsar(p,KeyEvent.VK_ENTER,true);pulsar(p,KeyEvent.VK_ENTER,false);p.avanzarFotograma(.02);
+        verificar(j.getEstado()==Juego.Estado.JUGANDO,"Volver de instrucciones y jugar");
+    }
     private static void renderizar(String carpeta) throws Exception {
         File dir=new File(carpeta); if (!dir.isDirectory() && !dir.mkdirs()) throw new IllegalStateException("No se pudo crear carpeta de capturas");
         Juego j=new Juego();GamePanel panel=new GamePanel(j,false);panel.setSize(1280,800);
@@ -175,6 +185,20 @@ public final class PruebasJuego {
         j.iniciarPartida();guardar(panel,new File(dir,"02_partida.png"));
         j.getNivel().getJugador().setPosicion(104,220);j.interactuar();guardar(panel,new File(dir,"03_producto.png"));
         j.pausar();guardar(panel,new File(dir,"04_pausa.png"));
+        j.terminarPartida();guardar(panel,new File(dir,"05_derrota.png"));
+        j.iniciarPartida();
+        for(Producto producto:j.getNivel().getProductos()) {
+            j.getNivel().getJugador().setPosicion(producto.getX(),producto.getY());j.interactuar();
+            for(Obstaculo o:j.getNivel().getObstaculos())if(o instanceof Estante&&((Estante)o).getCategoria().equals(producto.getCategoria())) {
+                j.getNivel().getJugador().setPosicion(o.getX()+15,o.getY()+o.getAlto()+2);j.interactuar();break;
+            }
+        }
+        verificar(j.getEstado()==Juego.Estado.VICTORIA,"Captura corresponde a victoria real");
+        guardar(panel,new File(dir,"06_victoria.png"));
+        Juego menu=new Juego();GamePanel instrucciones=new GamePanel(menu,false);instrucciones.setSize(1280,800);
+        pulsar(instrucciones,KeyEvent.VK_DOWN,false);instrucciones.avanzarFotograma(.02);
+        pulsar(instrucciones,KeyEvent.VK_ENTER,false);instrucciones.avanzarFotograma(.02);
+        guardar(instrucciones,new File(dir,"07_instrucciones.png"));
     }
     private static void guardar(GamePanel panel,File destino)throws Exception{
         BufferedImage imagen=new BufferedImage(1280,800,BufferedImage.TYPE_INT_RGB);

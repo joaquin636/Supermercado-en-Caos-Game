@@ -12,10 +12,10 @@ import java.awt.event.KeyEvent;
 import java.awt.geom.RoundRectangle2D;
 
 /** Toda la presentacion vive aqui; las ocho clases del UML conservan la logica. */
+@SuppressWarnings("serial")
 public final class GamePanel extends JPanel {
     private static final long serialVersionUID = 1L;
     public static final int ANCHO = 1280, ALTO = 800;
-    private static final int MAPA_X = 32, MAPA_Y = 176;
     private static final Color TINTA = new Color(26, 49, 49);
     private static final Color VERDE = new Color(25, 112, 91);
     private static final Color FONDO = new Color(245, 244, 235);
@@ -25,6 +25,10 @@ public final class GamePanel extends JPanel {
     private final boolean automatico;
     private long ultimoTick = System.nanoTime();
     private double acumulador;
+    private int seleccion;
+    private boolean instrucciones;
+    private double animacion;
+    private final java.awt.image.BufferedImage escena = new java.awt.image.BufferedImage(640,400,java.awt.image.BufferedImage.TYPE_INT_RGB);
 
     public GamePanel() { this(new Juego(), true); }
     public GamePanel(Juego juego, boolean automatico) {
@@ -49,12 +53,28 @@ public final class GamePanel extends JPanel {
 
     /** Se separa del Timer para poder comprobar controles y simulacion sin una ventana. */
     public void avanzarFotograma(double segundos) {
+        animacion += Math.max(0, Math.min(segundos, .15));
+        boolean arriba = teclado.consumir(KeyEvent.VK_UP) | teclado.consumir(KeyEvent.VK_W);
+        boolean abajo = teclado.consumir(KeyEvent.VK_DOWN) | teclado.consumir(KeyEvent.VK_S);
+        if (juego.getEstado() == Juego.Estado.MENU) {
+            if (arriba) seleccion = (seleccion + 2) % 3;
+            if (abajo) seleccion = (seleccion + 1) % 3;
+        }
         boolean confirmar = teclado.consumir(KeyEvent.VK_ENTER);
         boolean reiniciar = teclado.consumir(KeyEvent.VK_R);
         boolean pausa = teclado.consumir(KeyEvent.VK_P);
         pausa |= teclado.consumir(KeyEvent.VK_ESCAPE);
         boolean interactuar = teclado.consumir(KeyEvent.VK_E);
         Juego.Estado estado = juego.getEstado();
+        if (estado == Juego.Estado.MENU) {
+            if (instrucciones) { if (confirmar || pausa) instrucciones = false; repaint(); return; }
+            if (confirmar && seleccion == 1) { instrucciones = true; repaint(); return; }
+            if (confirmar && seleccion == 2) {
+                java.awt.Window ventana = SwingUtilities.getWindowAncestor(this);
+                if (ventana != null) ventana.dispose();
+                repaint(); return;
+            }
+        }
         if ((confirmar && estado != Juego.Estado.JUGANDO && estado != Juego.Estado.PAUSA)
                 || (reiniciar && (estado == Juego.Estado.VICTORIA || estado == Juego.Estado.DERROTA))) {
             juego.iniciarPartida(); teclado.limpiar(); acumulador = 0;
@@ -74,176 +94,160 @@ public final class GamePanel extends JPanel {
         teclado.limpiar(); juego.setDireccion(0, 0); juego.pausar(); acumulador = 0;
     }
 
+    private static final Color OSCURO = new Color(28,39,43), CREMA = new Color(244,224,174), ORO = new Color(229,169,74);
+    private void rect(Graphics2D g, int x,int y,int w,int h,int rgb) {g.setColor(new Color(rgb));g.fillRect(x,y,w,h);}
+    private void texto(Graphics2D g,String t,int x,int y,int size,Color c) {g.setColor(c);g.setFont(new Font(Font.MONOSPACED,Font.BOLD,size));g.drawString(t,x,y);}
+    private void marco(Graphics2D g,int x,int y,int w,int h) {
+        g.setColor(OSCURO);g.fillRect(x,y,w,h);g.setColor(ORO);g.drawRect(x+4,y+4,w-9,h-9);g.setColor(new Color(92,97,73));g.drawRect(x+8,y+8,w-17,h-17);
+    }
     @Override protected void paintComponent(Graphics graphics) {
         super.paintComponent(graphics);
-        Graphics2D g = (Graphics2D) graphics.create();
-        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-        double escala = Math.min(getWidth() / (double) ANCHO, getHeight() / (double) ALTO);
-        g.translate((getWidth() - ANCHO * escala) / 2, (getHeight() - ALTO * escala) / 2);
-        g.scale(escala, escala);
-        g.setColor(FONDO); g.fillRect(0, 0, ANCHO, ALTO);
-        cabecera(g);
-        mapa(g);
-        lateral(g);
-        texto(g, juego.getMensaje(), 36, 755, 15, TINTA, false);
-        texto(g, "WASD / FLECHAS  mover     E  recoger / entregar     P / ESC  pausa", 36, 782, 12, new Color(90, 104, 98), false);
-        if (juego.getEstado() != Juego.Estado.JUGANDO) pantallaEstado(g);
+        // Escala entera de la ilustracion; sin suavizado de sprites.
+        Graphics2D g=escena.createGraphics();
+        rect(g,0,0,640,400,0x17282c);
+        mundo(g);
+        hud(g);
+        if(juego.getEstado()!=Juego.Estado.JUGANDO) pantalla(g);
         g.dispose();
+        Graphics2D out=(Graphics2D)graphics.create();
+        out.setColor(OSCURO);out.fillRect(0,0,getWidth(),getHeight());
+        out.setRenderingHint(RenderingHints.KEY_INTERPOLATION,RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
+        double escala=Math.min(getWidth()/640.0,getHeight()/400.0);
+        int w=(int)(640*escala),h=(int)(400*escala);
+        out.drawImage(escena,(getWidth()-w)/2,(getHeight()-h)/2,w,h,null);out.dispose();
     }
-
-    private void cabecera(Graphics2D g) {
-        texto(g, "SUPERMERCADO", 32, 42, 13, VERDE, true);
-        texto(g, "En caos", 30, 83, 39, TINTA, true);
-        texto(g, "Un pasillo. Seis productos. Todo en su lugar.", 32, 112, 15, new Color(101, 113, 104), false);
-        tarjeta(g, 470, 30, 235, 91, Color.WHITE);
-        texto(g, "PUNTUACIÓN", 492, 56, 11, VERDE, true);
-        texto(g, String.format("%03d", juego.getPuntuacion()), 492, 94, 31, TINTA, true);
-        tarjeta(g, 721, 30, 245, 91, Color.WHITE);
-        texto(g, "TIEMPO RESTANTE", 743, 56, 11, VERDE, true);
-        int segundos = (int) Math.ceil(juego.getTiempoRestante());
-        Color reloj = segundos <= 30 ? new Color(194, 64, 47) : TINTA;
-        texto(g, String.format("%02d:%02d", segundos / 60, segundos % 60), 743, 94, 31, reloj, true);
-        tarjeta(g, 982, 30, 266, 91, VERDE);
-        texto(g, "NIVEL 01", 1004, 56, 11, new Color(202, 237, 211), true);
-        texto(g, "Turno de apertura", 1004, 91, 21, Color.WHITE, true);
-        texto(g, "PLANO DEL SUPERMERCADO", 34, 157, 11, VERDE, true);
-        texto(g, "TÚ: AZUL     CLIENTES: CORAL", 742, 157, 11, new Color(102, 112, 108), true);
+    private void mundo(Graphics2D g) {
+        // Los limites visuales del suelo coinciden con los del modelo (960 x 540).
+        rect(g,12,52,488,280,0x101f26);
+        rect(g,16,56,480,270,0xa5ad91);
+        for(int y=0;y<18;y++)for(int x=0;x<32;x++) {
+            int px=16+x*15,py=56+y*15;
+            rect(g,px,py,14,14,((x+y)%2==0)?0xc9c7a4:0xbebf9c);
+            rect(g,px+1,py+1,12,1,0xd4d1b0);
+            if((x*13+y*7)%41==0)rect(g,px+9,py+10,2,1,0xa7ac8c);
+        }
+        // Fachada y rotulos quedan fuera de la zona transitable.
+        rect(g,12,40,488,12,0x5c7463);rect(g,16,42,480,3,0x91aa7e);
+        texto(g,"MERCADO LA ESQUINA",26,49,8,CREMA);
+        texto(g,"REPOSICION / TURNO 01",336,49,7,CREMA);
+        Graphics2D m=(Graphics2D)g.create();m.translate(16,56);m.scale(.5,.5);
+        for(Obstaculo o:juego.getNivel().getObstaculos()) estante(m,o);
+        for(Producto p:juego.getNivel().getProductos())if(p.estaDisponible()) {
+            int x=(int)p.getX(),y=(int)p.getY();
+            rect(m,x-4,y+21,33,5,0x91977c);
+            producto(m,p,x,y-(int)(Math.sin(animacion*4)*2));
+            if(juego.getNivel().productoCercano()==p)texto(m,"[E]",x-2,y-9,14,OSCURO);
+        }
+        java.util.List<Personaje> orden=new java.util.ArrayList<>(juego.getNivel().getPersonajes());
+        orden.sort(java.util.Comparator.comparingDouble(Personaje::getY));
+        for(Personaje p:orden)persona(m,p);
+        m.dispose();
+        rect(g,18,318,50,8,0x647f70);texto(g,"ENTRADA",23,324,7,CREMA);
     }
-
-    private void mapa(Graphics2D original) {
-        Graphics2D g = (Graphics2D) original.create();
-        g.translate(MAPA_X, MAPA_Y);
-        g.setColor(new Color(231, 234, 223)); g.fillRoundRect(-2, -2, Nivel.ANCHO + 4, Nivel.ALTO + 4, 18, 18);
-        g.setClip(new RoundRectangle2D.Double(0, 0, Nivel.ANCHO, Nivel.ALTO, 16, 16));
-        g.setColor(new Color(250, 249, 239)); g.fillRect(0, 0, Nivel.ANCHO, Nivel.ALTO);
-        g.setColor(new Color(236, 235, 223));
-        for (int x = 0; x <= Nivel.ANCHO; x += 48) g.drawLine(x, 0, x, Nivel.ALTO);
-        for (int y = 0; y <= Nivel.ALTO; y += 48) g.drawLine(0, y, Nivel.ANCHO, y);
-        texto(g, "ENTRADA", 26, 24, 10, new Color(133, 143, 125), true);
-        for (Obstaculo o : juego.getNivel().getObstaculos()) dibujarObstaculo(g, o);
-        for (Producto p : juego.getNivel().getProductos()) if (p.estaDisponible()) dibujarProducto(g, p);
-        for (Personaje p : juego.getNivel().getPersonajes()) dibujarPersonaje(g, p);
-        g.dispose();
-    }
-    private void dibujarObstaculo(Graphics2D g, Obstaculo o) {
-        int x = (int) o.getX(), y = (int) o.getY(), w = o.getAncho(), h = o.getAlto();
-        g.setColor(new Color(0, 0, 0, 24)); g.fillRoundRect(x + 3, y + 6, w, h, 10, 10);
-        if (o instanceof Estante) {
-            Estante e = (Estante) o;
-            Color color = colorCategoria(e.getCategoria());
-            g.setColor(new Color(236, 237, 225)); g.fillRoundRect(x, y, w, h, 9, 9);
-            g.setColor(color); g.fillRoundRect(x, y, w, 28, 9, 9);
-            texto(g, e.getCategoria(), x + 12, y + 19, 12, Color.WHITE, true);
-            for (int i = 0; i < 7; i++) {
-                g.setColor(new Color(color.getRed(), color.getGreen(), color.getBlue(), 110));
-                g.fillRoundRect(x + 12 + i * 23, y + 38, 15, 23, 4, 4);
+    private int color(String c) {return Producto.FRUTAS.equals(c)?0x8ca654:Producto.LACTEOS.equals(c)?0x84b5bd:0xad87ae;}
+    private void estante(Graphics2D g,Obstaculo o) {
+        int x=(int)o.getX(),y=(int)o.getY(),w=o.getAncho(),h=o.getAlto();
+        rect(g,x+4,y+h,w,8,0x92997f);
+        if(o instanceof Estante) {
+            Estante e=(Estante)o;
+            rect(g,x,y,w,h,0x394e49);rect(g,x+4,y+4,w-8,h-12,0x846b4e);
+            for(int fila=0;fila<2;fila++) {
+                for(int i=0;i<10;i++) {
+                    int px=x+8+i*16,py=y+7+fila*26;
+                    rect(g,px,py+2,10,17,color(e.getCategoria()));
+                    rect(g,px+2,py,6,3,0xf3dfae);rect(g,px+2,py+7,6,4,0xded7b4);
+                    rect(g,px+8,py+3,2,15,0x4a6655);
+                }
+                rect(g,x+3,y+27+fila*26,w-6,4,0xc4a071);
             }
-            texto(g, e.getRecibidos().size() + "/2", x + w - 33, y + 19, 11, Color.WHITE, true);
-            Producto mano = juego.getNivel().getJugador().getProductoEnMano();
-            if (mano != null && e.aceptaProducto(mano)) {
-                g.setColor(color); g.setStroke(new BasicStroke(2));
-                g.drawRoundRect(x - 5, y - 5, w + 10, h + 10, 12, 12); g.setStroke(new BasicStroke(1));
+            rect(g,x+2,y+57,w-4,16,color(e.getCategoria()));
+            texto(g,e.getCategoria()+" "+e.getRecibidos().size()+"/2",x+8,y+70,16,OSCURO);
+            Producto mano=juego.getNivel().getJugador().getProductoEnMano();
+            if(mano!=null&&e.aceptaProducto(mano)) {g.setColor(ORO);g.drawRect(x-3,y-3,w+6,h+6);}
+        } else {
+            rect(g,x,y,w,h,0x77553e);rect(g,x+3,y+3,w-6,h-10,0xb58b59);
+            rect(g,x+5,y+5,w-10,3,0xd2ad73);rect(g,x+w/2-4,y+2,8,h-6,0xd8bc80);
+            rect(g,x+12,y+23,21,17,0xe9d5a0);texto(g,"UP",x+14,y+36,11,OSCURO);
+            rect(g,x+2,y+h-9,w-4,7,0x966d47);
+        }
+    }
+    private void producto(Graphics2D g,Producto p,int x,int y) {
+        if(Producto.FRUTAS.equals(p.getCategoria())) {
+            rect(g,x+6,y+5,15,18,0x943e3c);rect(g,x+3,y+8,21,11,0xc96049);
+            rect(g,x+7,y+6,4,5,0xed9760);rect(g,x+12,y+1,3,6,0x594936);rect(g,x+15,y+1,7,3,0x63814d);
+        } else {
+            rect(g,x+4,y+5,18,20,0x354e51);rect(g,x+6,y+5,14,18,color(p.getCategoria()));
+            rect(g,x+8,y+1,10,5,0xf1dfb3);rect(g,x+8,y+11,10,6,0xf6e9c8);
+        }
+    }
+    private void persona(Graphics2D g,Personaje p) {
+        int x=(int)p.getX(),y=(int)p.getY();boolean j=p instanceof Jugador;
+        rect(g,x+2,y+26,28,5,0x8d967c);
+        if(j&&((Jugador)p).esInmune()&&((int)(animacion*12)%2==0))return;
+        int paso=(Math.abs(p.getDesplazamientoX())+Math.abs(p.getDesplazamientoY())>.01)?((int)(animacion*9)%2)*3:0;
+        rect(g,x+6,y+22,7,8-paso,0x283d42);rect(g,x+19,y+22,7,5+paso,0x283d42);
+        rect(g,x+3,y+11,25,13,j?0x456d70:0xb4684f);
+        rect(g,x+9,y+13,13,13,j?0xd8b66c:0x775c71);
+        rect(g,x+2,y+15,5,8,0xdfad7c);rect(g,x+26,y+15,4,8,0xdfad7c);
+        rect(g,x+7,y-4,18,17,0x443d36);rect(g,x+8,y,16,12,0xe6b783);
+        rect(g,x+6,y-5,20,6,j?0x527d67:0x644837);rect(g,x+5,y,23,3,j?0x7ca178:0x644837);
+        boolean espalda=p.getDesplazamientoY()<0;
+        if(espalda)rect(g,x+8,y+3,16,7,0x574738);
+        else {rect(g,x+11,y+5,2,3,0x2e3938);rect(g,x+20,y+5,2,3,0x2e3938);}
+        if(j&&((Jugador)p).getProductoEnMano()!=null)producto(g,((Jugador)p).getProductoEnMano(),x+23,y+12);
+    }
+    private void hud(Graphics2D g) {
+        texto(g,"SUPERMERCADO",16,17,10,CREMA);texto(g,"EN CAOS",16,31,13,ORO);
+        int t=(int)Math.ceil(juego.getTiempoRestante());
+        texto(g,String.format("TIEMPO %02d:%02d",t/60,t%60),226,23,11,t<=30?new Color(235,119,83):CREMA);
+        texto(g,"PTS "+String.format("%03d",juego.getPuntuacion()),421,23,11,ORO);
+        marco(g,508,40,120,292);
+        texto(g,"LA LISTA",521,62,11,ORO);texto(g,"ORDENA 6",521,81,9,CREMA);texto(g,"PRODUCTOS",521,94,9,CREMA);
+        for(int i=0;i<6;i++) {
+            Producto p=juego.getNivel().getProductos().get(i);int y=119+i*23;
+            rect(g,520,y-8,7,7,p.isEntregado()?0x8ca654:0x596362);
+            texto(g,p.getNombre(),533,y,8,CREMA);
+        }
+        texto(g,"EN MANO",521,270,9,ORO);
+        Producto p=juego.getNivel().getJugador().getProductoEnMano();
+        texto(g,p==null?"Vacia":p.getNombre(),521,286,8,CREMA);
+        texto(g,p==null?"Busca en suelo":p.getCategoria(),521,302,8,CREMA);
+        marco(g,12,340,616,48);
+        String mensaje=juego.getMensaje();
+        // Ajuste por palabras para evitar que los mensajes invadan los bordes.
+        int linea=0;String actual="";
+        for(String palabra:mensaje.split(" ")) {
+            if((actual+palabra).length()>92){texto(g,actual,24,355+linea*11,9,CREMA);linea++;actual="";}
+            actual+=palabra+" ";
+        }
+        texto(g,actual,24,355+linea*11,9,CREMA);
+        texto(g,"WASD / FLECHAS  MOVER     E  INTERACTUAR     P / ESC  PAUSA",24,379,8,ORO);
+    }
+    private void pantalla(Graphics2D g) {
+        g.setColor(new Color(14,25,29,190));g.fillRect(0,0,640,400);
+        marco(g,106,65,428,272);
+        Juego.Estado e=juego.getEstado();
+        if(e==Juego.Estado.MENU&&!instrucciones) {
+            texto(g,"MERCADO LA ESQUINA PRESENTA",158,91,9,ORO);
+            texto(g,"SUPERMERCADO",166,127,25,CREMA);texto(g,"EN CAOS",238,155,23,ORO);
+            texto(g,"Un turno para poner todo en su lugar",161,177,9,CREMA);
+            String[] opciones={"JUGAR / INICIAR","INSTRUCCIONES","SALIR"};
+            for(int i=0;i<3;i++) {
+                int y=208+i*29;
+                if(seleccion==i){rect(g,174,y-14,292,23,0x3e5c52);texto(g,">",184,y,12,ORO);}
+                texto(g,opciones[i],218,y,12,seleccion==i?ORO:CREMA);
             }
+            texto(g,"ARRIBA / ABAJO   ELEGIR     ENTER   ACEPTAR",143,312,9,CREMA);
+        } else if(instrucciones) {
+            texto(g,"COMO JUGAR",240,103,17,ORO);
+            String[] lineas={"WASD o flechas: caminar por los pasillos.","E: recoger un producto cercano.","E junto al estante correcto: entregar.","Solo puedes llevar un producto a la vez.","6 entregas en 180 segundos = victoria.","Cada cliente que tocas resta 5 segundos.","P / ESC: pausar. Cambiar ventana pausa.","ENTER / ESC: volver al menu."};
+            for(int i=0;i<lineas.length;i++)texto(g,lineas[i],128,137+i*23,9,CREMA);
         } else {
-            g.setColor(new Color(189, 148, 100)); g.fillRoundRect(x, y, w, h, 6, 6);
-            g.setColor(new Color(219, 183, 136)); g.fillRect(x + w / 2 - 7, y, 14, h);
-            texto(g, "CAJAS", x + 12, y + h - 12, 11, new Color(89, 64, 36), true);
+            String titulo=e==Juego.Estado.PAUSA?"TURNO EN PAUSA":e==Juego.Estado.VICTORIA?"TODO EN SU LUGAR":"SE ACABO EL TURNO";
+            texto(g,titulo,156,132,20,ORO);
+            texto(g,"Entregas: "+juego.getNivel().getEntregados()+" / 6   Puntos: "+juego.getPuntuacion(),163,178,12,CREMA);
+            texto(g,e==Juego.Estado.PAUSA?"P / ESC para continuar":"ENTER / R para volver a jugar",180,234,12,CREMA);
+            texto(g,e==Juego.Estado.VICTORIA?"La tienda esta lista para abrir.":e==Juego.Estado.PAUSA?"El reloj y los clientes estan detenidos.":"Prueba rutas cortas y evita los clientes.",147,286,9,CREMA);
         }
-    }
-    private void dibujarProducto(Graphics2D g, Producto p) {
-        int x = (int) p.getX(), y = (int) p.getY();
-        g.setColor(new Color(0, 0, 0, 22)); g.fillOval(x - 4, y + 17, 33, 12);
-        g.setColor(Color.WHITE); g.fillRoundRect(x - 4, y - 4, 32, 32, 10, 10);
-        g.setColor(colorCategoria(p.getCategoria())); g.fillRoundRect(x, y, 24, 24, 7, 7);
-        texto(g, p.getCategoria().substring(0, 1), x + 7, y + 17, 14, Color.WHITE, true);
-        g.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 11));
-        int ancho = g.getFontMetrics().stringWidth(p.getNombre());
-        texto(g, p.getNombre(), x + 12 - ancho / 2, y + 44, 11, TINTA, false);
-        if (juego.getNivel().productoCercano() == p && juego.getNivel().getJugador().getProductoEnMano() == null) {
-            g.setColor(VERDE); g.setStroke(new BasicStroke(2));
-            g.drawRoundRect(x - 7, y - 7, 38, 38, 12, 12); g.setStroke(new BasicStroke(1));
-        }
-    }
-    private void dibujarPersonaje(Graphics2D g, Personaje p) {
-        int x = (int) p.getX(), y = (int) p.getY();
-        boolean jugador = p instanceof Jugador;
-        g.setColor(new Color(0, 0, 0, 28)); g.fillOval(x - 2, y + 23, 35, 13);
-        g.setColor(jugador ? new Color(55, 118, 208) : new Color(219, 108, 88));
-        g.fillRoundRect(x, y, 30, 30, 11, 11);
-        g.setColor(new Color(254, 226, 191)); g.fillOval(x + 7, y + 3, 16, 15);
-        g.setColor(TINTA); g.fillOval(x + 11, y + 9, 2, 2); g.fillOval(x + 18, y + 9, 2, 2);
-        if (jugador) {
-            Jugador j = (Jugador) p;
-            texto(g, "TÚ", x + 6, y - 9, 10, new Color(44, 91, 161), true);
-            if (j.esInmune()) { g.setColor(new Color(244, 169, 65)); g.setStroke(new BasicStroke(3)); g.drawOval(x - 6, y - 6, 42, 42); g.setStroke(new BasicStroke(1)); }
-            if (j.getProductoEnMano() != null) { g.setColor(colorCategoria(j.getProductoEnMano().getCategoria())); g.fillRoundRect(x + 23, y + 16, 15, 15, 4, 4); }
-        }
-    }
-    private void lateral(Graphics2D g) {
-        tarjeta(g, 1016, 176, 232, 540, Color.WHITE);
-        texto(g, "TU MISIÓN", 1036, 205, 12, VERDE, true);
-        texto(g, "Cada cosa", 1036, 240, 23, TINTA, true);
-        texto(g, "en su lugar.", 1036, 268, 23, TINTA, true);
-        texto(g, "Recoge un producto y", 1036, 299, 14, TINTA, false);
-        texto(g, "llévalo a su categoría.", 1036, 320, 14, TINTA, false);
-        int entregados = juego.getNivel().getEntregados();
-        texto(g, "ENTREGADOS", 1036, 357, 11, VERDE, true);
-        texto(g, entregados + " / 6", 1036, 394, 29, TINTA, true);
-        g.setColor(new Color(229, 237, 229)); g.fillRoundRect(1036, 410, 190, 8, 8, 8);
-        g.setColor(VERDE); g.fillRoundRect(1036, 410, 190 * entregados / 6, 8, 8, 8);
-        texto(g, "EN TU MANO", 1036, 454, 11, VERDE, true);
-        Producto p = juego.getNivel().getJugador().getProductoEnMano();
-        texto(g, p == null ? "Sin producto" : p.getNombre(), 1036, 482, 19, TINTA, true);
-        texto(g, p == null ? "Pulsa E cerca de uno." : p.getCategoria(), 1036, 505, 12, p == null ? TINTA : colorCategoria(p.getCategoria()), false);
-        g.setColor(new Color(231, 236, 228)); g.drawLine(1036, 531, 1226, 531);
-        texto(g, "+100 por entrega", 1036, 562, 15, VERDE, true);
-        texto(g, "Cliente: -5 segundos", 1036, 589, 14, new Color(179, 76, 59), false);
-        texto(g, "Solo llevas un producto.", 1036, 629, 12, TINTA, false);
-        texto(g, "P / ESC para pausar.", 1036, 650, 12, TINTA, false);
-        texto(g, "Evita cajas y estantes.", 1036, 671, 12, TINTA, false);
-    }
-    private void pantallaEstado(Graphics2D g) {
-        g.setColor(new Color(14, 35, 32, 178)); g.fillRect(0, 0, ANCHO, ALTO);
-        tarjeta(g, 350, 200, 580, 380, FONDO);
-        Juego.Estado e = juego.getEstado();
-        String etiqueta, titulo, linea1, linea2, boton;
-        if (e == Juego.Estado.MENU) {
-            etiqueta = "TURNO 01 / REPOSICIÓN"; titulo = "¿Listo para el caos?";
-            linea1 = "Organiza 6 productos en 3 minutos.";
-            linea2 = "WASD o flechas para moverte. E para interactuar."; boton = "ENTER  ·  COMENZAR";
-        } else if (e == Juego.Estado.PAUSA) {
-            etiqueta = "RELOJ DETENIDO"; titulo = "Una pequeña pausa";
-            linea1 = "La partida y los clientes están detenidos.";
-            linea2 = "También pausamos cuando cambias de ventana."; boton = "P / ESC  ·  CONTINUAR";
-        } else if (e == Juego.Estado.VICTORIA) {
-            etiqueta = "NIVEL COMPLETADO"; titulo = "Todo en su lugar";
-            linea1 = "Entregaste los 6 productos. Puntaje: " + juego.getPuntuacion();
-            linea2 = "Este hito incluye un nivel. ¡Puedes volver a jugar!"; boton = "ENTER / R  ·  NUEVA PARTIDA";
-        } else {
-            etiqueta = "FIN DEL TURNO"; titulo = "Se terminó el tiempo";
-            linea1 = "Entregados: " + juego.getNivel().getEntregados() + "/6. Puntaje: " + juego.getPuntuacion();
-            linea2 = "Busca rutas cortas y evita chocar con los clientes."; boton = "ENTER / R  ·  REINTENTAR";
-        }
-        centrado(g, etiqueta, 250, 12, VERDE, true);
-        centrado(g, titulo, 306, 34, TINTA, true);
-        centrado(g, linea1, 352, 17, TINTA, false);
-        centrado(g, linea2, 385, 15, TINTA, false);
-        tarjeta(g, 405, 427, 470, 60, VERDE);
-        centrado(g, boton, 465, 16, Color.WHITE, true);
-        centrado(g, "FRUTAS  /  LÁCTEOS  /  LIMPIEZA", 535, 12, new Color(105, 117, 106), true);
-    }
-    private static Color colorCategoria(String categoria) {
-        if (Producto.FRUTAS.equals(categoria)) return new Color(57, 145, 97);
-        if (Producto.LACTEOS.equals(categoria)) return new Color(67, 136, 186);
-        return new Color(161, 111, 180);
-    }
-    private static void tarjeta(Graphics2D g, int x, int y, int w, int h, Color c) { g.setColor(c); g.fillRoundRect(x, y, w, h, 18, 18); }
-    private static void texto(Graphics2D g, String s, int x, int y, int size, Color c, boolean bold) {
-        g.setColor(c); g.setFont(new Font(Font.SANS_SERIF, bold ? Font.BOLD : Font.PLAIN, size)); g.drawString(s, x, y);
-    }
-    private static void centrado(Graphics2D g, String s, int y, int size, Color c, boolean bold) {
-        g.setFont(new Font(Font.SANS_SERIF, bold ? Font.BOLD : Font.PLAIN, size));
-        texto(g, s, (ANCHO - g.getFontMetrics().stringWidth(s)) / 2, y, size, c, bold);
     }
 }

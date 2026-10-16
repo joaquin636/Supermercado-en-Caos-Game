@@ -10,7 +10,7 @@ public final class GameWindow extends JFrame {
     private final GamePanel panel;
 
     public GameWindow() {
-        super("Supermercado en Caos | Hito 60%");
+        super("Supermercado en Caos | Mercado La Esquina");
         panel = new GamePanel();
         setContentPane(panel);
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);

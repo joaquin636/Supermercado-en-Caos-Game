@@ -22,7 +22,7 @@ public final class Nivel {
     public Nivel(int numero) {
         if (numero != 1) throw new IllegalArgumentException("Este hito implementa solamente el nivel 1.");
         this.numero = numero;
-        tiempoLimite = 180;
+        tiempoLimite = 60;
         cargar();
     }
 
