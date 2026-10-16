@@ -1,109 +1,91 @@
 # Supermercado en Caos
 
-<<<<<<< Updated upstream
-## 📝 Descripción
+**Supermercado en Caos** es un videojuego cenital 2D desarrollado en Java (versión 17+, Swing / Java2D) sin dependencias ni bibliotecas externas[cite: 2]. Proyecto desarrollado para el curso de Programación Orientada a Objetos (POO) de la Universidad Peruana Cayetano Heredia[cite: 2].
 
-**Supermercado en Caos** es un videojuego 2D desarrollado en Java (Swing/Java2D) como proyecto final del curso de Programación Orientada a Objetos (POO) de la Universidad Peruana Cayetano Heredia.
-
-El jugador asume el papel de un repositor de supermercado que debe organizar productos que se encuentran esparcidos por el suelo antes de que termine el tiempo. Durante la partida, tendrá que recorrer los pasillos, recoger productos (uno a la vez), colocarlos en los estantes correspondientes y evitar chocar con clientes apurados y obstáculos sólidos.
-=======
-Juego cenital de reposicion en Java 17+, Java2D y Swing, sin dependencias externas.
-Un nivel completo: seis entregas en 180 segundos.
+El juego consta de un nivel completo donde el objetivo es realizar seis entregas de productos en un tiempo máximo de 180 segundos (3 minutos)[cite: 2].
 
 ![Partida](docs/capturas/02_partida.png)
 
-## Ejecutar
+---
 
-Extraer todo el ZIP. Con Java 17 o superior: `java -jar dist/SupermercadoEnCaos.jar`.
-Para compilar los fuentes: `ejecutar.bat` (Windows) o `bash ejecutar.sh` (Linux/macOS), con un JDK 17+.
-Si Java de PATH falla, configurar JAVA_HOME al JDK. En IntelliJ abrir esta carpeta y ejecutar `com.supermercado.Main`.
+## 🚀 Ejecución y Compilación
 
-## Controles y objetivo
->>>>>>> Stashed changes
-
-- Menu: arriba/abajo o W/S, Enter para Jugar/Iniciar, Instrucciones o Salir.
-- Partida: WASD o flechas para moverse, E para recoger o entregar cerca del objeto.
-- P o Esc pausa/reanuda. Cambiar de ventana pausa y limpia teclas.
-- Enter o R vuelve a jugar despues de victoria o derrota.
-- Solo se lleva un producto. Cada entrega en la categoria correcta vale 100 puntos.
-- Los estantes y cajas bloquean. Los clientes restan cinco segundos al contacto, con un segundo de inmunidad.
-- Se gana entregando los seis productos; se pierde al agotarse el reloj.
-
-<<<<<<< Updated upstream
-## 🎮 Controles
-
-- **WASD / Flechas:** Mover al personaje.
-- **Tecla E:** Recoger un producto del suelo o entregarlo en un estante.
-- **Tecla P / ESC:** Pausar o reanudar la partida.
-=======
-## Arte y alcance
-
-Paleta limitada, baldosas, estantes, cajas, productos y personajes originales dibujados por Java.
-Animacion de pasos, orientacion vertical, flotacion de productos y parpadeo de inmunidad.
-El atlas PNG en assets documenta las formas; el juego dibuja desde el codigo, sin archivos necesarios en ejecucion. 
-No hay audio ni niveles adicionales.
-
-## Arquitectura y rubrica
->>>>>>> Stashed changes
-
-Ver docs/ARQUITECTURA.md, docs/UML.svg y docs/UML.drawio. Ocho clases de dominio mas cuatro auxiliares reales.
-El enum de pantallas no se presenta como patron State.
-Consultar docs/GIT.md y docs/EXPOSICION.md.
-
-<<<<<<< Updated upstream
-## 🎯 Objetivo del juego
-
-El objetivo principal es organizar todos los productos en sus estantes correctos antes de que el temporizador llegue a cero. 
-
-El jugador obtiene puntos por colocar correctamente los productos, pero perderá valiosos segundos de su tiempo si colisiona con los clientes que recorren la tienda.
+1. **Ejecutar JAR:**
+   * Extraer todo el ZIP[cite: 2].
+   * Con Java 17 o superior instalado, ejecutar:
+     ```bash
+     java -jar dist/SupermercadoEnCaos.jar
+     ```
+2. **Compilar desde código fuente:**
+   * **Windows:** Ejecutar `ejecutar.bat` (requiere JDK 17+)[cite: 2].
+   * **Linux / macOS:** Ejecutar `bash ejecutar.sh` (requiere JDK 17+)[cite: 2].
+   * Si el comando `java` del sistema falla, asegúrate de configurar la variable `JAVA_HOME` apuntando a tu JDK[cite: 2].
+   * **Entorno IDE:** En IntelliJ (o similares), abrir esta carpeta raíz y ejecutar la clase principal `com.supermercado.Main`[cite: 2].
 
 ---
 
-## 📦 Productos y Categorías (Implementación Actual)
+## 🎮 Controles y Dinámica de Juego
 
-El juego cuenta actualmente con 6 productos divididos en 3 categorías clave. El jugador deberá identificar el estante correcto para cada uno:
+* **Navegación en Menús:** Teclas `Arriba` / `Abajo` o `W` / `S`. Presionar `Enter` para seleccionar *Jugar/Iniciar*, *Instrucciones* o *Salir*[cite: 2].
+* **Movimiento del Personaje:** Teclas `WASD` o `Flechas direccionales`[cite: 2].
+* **Interacción (`E`):** Presionar la tecla `E` estando cerca de un objeto para recogerlo del suelo o entregarlo en su estante[cite: 2].
+* **Pausa (`P` / `ESC`):** Pausa o reanuda la partida[cite: 2]. Cambiar el foco de la ventana pausa el juego automáticamente y limpia las teclas presionadas[cite: 2].
+* **Reiniciar (`Enter` / `R`):** Permite volver a jugar inmediatamente después de una pantalla de victoria o derrota[cite: 2].
 
-| Categoría | Productos |
-|---|---|
+---
+
+## 🎯 Objetivo y Reglas de Juego
+
+* **Transporte:** El repositor solo puede llevar un producto a la vez[cite: 2].
+* **Puntuación:** Cada entrega realizada en la categoría correcta otorga **+100 puntos**[cite: 2].
+* **Obstáculos:** Las cajas y los estantes actúan como objetos sólidos que bloquean el paso[cite: 2].
+* **Clientes:** Los clientes patrullan por la tienda[cite: 2]. Al chocar con ellos, se aplican **-5 segundos** de penalización al reloj, otorgando **1 segundo de inmunidad temporal** tras el contacto[cite: 2].
+* **Condición de Victoria:** Se gana al entregar correctamente los 6 productos en sus estantes antes de que expire el tiempo[cite: 2].
+* **Condición de Derrota:** Se pierde automáticamente si el temporizador llega a 00:00[cite: 2].
+
+---
+
+## 📦 Productos y Categorías
+
+El juego cuenta con 6 productos repartidos en 3 categorías bien definidas[cite: 2]:
+
+| Categoría | Productos Incluidos |
+| :--- | :--- |
 | **Frutas** | Manzana, Plátano |
-| **Limpieza** | Detergente, Jabón |
 | **Lácteos** | Leche, Yogur |
+| **Limpieza** | Detergente, Jabón |
 
 ---
 
 ## 🚧 Obstáculos y Personajes
 
-- **El Repositor (Jugador):** Personaje principal. Solo puede cargar un producto a la vez.
-- **Clientes:** Personajes secundarios que patrullan la tienda. Si el jugador choca con ellos, sufrirá una penalización de tiempo.
-- **Cajas y Estantes:** Obstáculos sólidos que bloquean el paso y obligan al jugador a buscar rutas alternas.
-- *(En desarrollo para la versión final: Supervisores, derrames en el piso y carritos descontrolados).*
+* **El Repositor (Jugador):** Personaje principal controlado por el jugador. Solo puede cargar un producto a la vez[cite: 2].
+* **Clientes:** Personajes secundarios que patrullan la tienda de forma autónoma. Al colisionar con ellos, penalizan el tiempo restante[cite: 2].
+* **Cajas y Estantes:** Obstáculos sólidos que bloquean el paso y delimitan los pasillos[cite: 2].
+* *(En desarrollo para la versión final: Supervisores, derrames en el piso y carritos descontrolados)*[cite: 2].
 
 ---
 
-## 🏆 Sistema de Puntuación y Tiempo
+## 🎨 Arte y Alcance Visual
 
-Para el **Nivel 1 (Turno de apertura)**, las reglas de puntuación y tiempo son las siguientes:
-
-- **Tiempo inicial:** 180 segundos (3 minutos).
-- **Producto colocado correctamente:** +100 puntos.
-- **Chocar con un cliente:** -5 segundos de penalización (otorga una breve inmunidad tras el choque).
-- **Condición de Victoria:** Entregar los 6 productos antes de que el reloj llegue a 00:00.
+* **Gráficos Originales:** Estilo pixel art original dibujado mediante Java2D (baldosas, mobiliario, productos y personajes) con una paleta limitada y coherente[cite: 1, 2].
+* **Efectos Visuales:** Animación de pasos, orientación vertical, flotación de productos e indicadores de parpadeo para la inmunidad[cite: 1, 2].
+* **Atlas de Texturas:** El archivo `atlas PNG` ubicado en la carpeta `assets` documenta las formas originales[cite: 2]. Sin embargo, el juego drena y dibuja directamente desde código, por lo que no requiere archivos externos durante la ejecución[cite: 2].
+* **Alcance:** No incluye audio ni niveles adicionales[cite: 1, 2].
 
 ---
 
-## 💻 Programación Orientada a Objetos (POO)
+## 🏛️ Arquitectura y Cumplimiento de Rúbrica
 
-El proyecto está diseñado bajo una arquitectura limpia que demuestra el dominio de los siguientes pilares de la POO:
+* **Estructura:** El proyecto cuenta con **8 clases de dominio** y **4 clases auxiliares reales**[cite: 1, 2].
+* **Documentación:** Ver detalles técnicos en `docs/ARQUITECTURA.md`, `docs/UML.svg` y `docs/UML.drawio`[cite: 2].
+* **Detalles Técnicos:** El `enum` de manejo de pantallas se utiliza exclusivamente para la selección de vistas y no se presenta como un patrón de diseño State[cite: 1, 2].
+* **Evidencias y Defensa:** Consultar `docs/GIT.md` y `docs/EXPOSICION.md`[cite: 2].
 
-- **Abstracción y Herencia:** Clases abstractas como `Personaje` (de la cual heredan `Jugador` y `Cliente`) y `Obstaculo` (padre de `Estante`).
-- **Polimorfismo:** El bucle de juego actualiza a todas las entidades (movimiento y colisiones) mediante llamadas polimórficas al método `update()`.
-- **Encapsulamiento:** Protección de atributos críticos (puntos, tiempo, coordenadas) mediante métodos de acceso controlados.
-- **Asociación, Agregación y Composición:** Evidenciadas en la relación del jugador con los productos, los estantes que agrupan los objetos entregados, y el `Juego` que compone y gestiona el `Nivel` completo.
-=======
-## Verificacion
+---
 
-`probar.bat` o `bash probar.sh` compila y ejecuta pruebas sin bibliotecas externas.
-Las pruebas cubren movimiento, colisiones, transporte, categoria incorrecta, victoria, derrota, pausa,
-inmunidad, controles y navegacion a instrucciones. Generan capturas del panel Swing.
-El recorrido automatizado usa el resolvedor real de colisiones; no simula todas las pulsaciones de un jugador humano.
->>>>>>> Stashed changes
+## 🧪 Verificación y Pruebas Automatizadas
+
+* **Ejecutar Pruebas:** Ejecuta `probar.bat` (Windows) o `bash probar.sh` (Linux/macOS) para compilar y correr la suite de pruebas sin librerías externas[cite: 2].
+* **Cobertura de Pruebas:** Las pruebas automáticas evalúan el movimiento, colisiones, transporte, entregas en categorías incorrectas, victoria, derrota, pausa, inmunidad, respuesta de controles y navegación hacia las instrucciones[cite: 2]. Además, generan capturas directas del panel Swing[cite: 1, 2].
+* **Nota sobre la ruta automatizada:** El recorrido automático utiliza el resolvedor real de colisiones del modelo y pasos de actualización entre segmentos; no simula todas las pulsaciones físicas de un jugador humano[cite: 1, 2].
