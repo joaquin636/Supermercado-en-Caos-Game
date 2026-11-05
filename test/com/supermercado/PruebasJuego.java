@@ -31,7 +31,7 @@ public final class PruebasJuego {
         System.setProperty("java.awt.headless", "true");
         movimiento(); entregas(); estados(); recorridoCompleto();
         SwingUtilities.invokeAndWait(() -> {
-            try { teclado(); renderizar(args.length == 0 ? "docs/capturas" : args[0]); }
+            try { teclado(); renderizar(args.length == 0 ? "build/capturas-pruebas" : args[0]);}
             catch (Exception e) { throw new RuntimeException(e); }
         });
         System.out.println("OK: " + comprobaciones + " comprobaciones. Movimiento, colisiones, entrega, partida, teclado y render.");
@@ -74,22 +74,83 @@ public final class PruebasJuego {
     }
     private static void estados() {
         Juego j = nuevo();
-        double tiempo = j.getTiempoRestante(); j.alternarPausa(); j.setDireccion(1, 0);
+
+        double tiempo = j.getTiempoRestante();
+        j.alternarPausa();
+        j.setDireccion(1, 0);
+
         double x = j.getNivel().getJugador().getX();
-        for (int i = 0; i < 100; i++) j.actualizar();
-        verificar(j.getTiempoRestante() == tiempo && j.getNivel().getJugador().getX() == x, "Pausa congela tiempo y personaje");
-        j.alternarPausa(); j.setDireccion(0, 0); j.actualizar();
-        verificar(j.getTiempoRestante() < tiempo, "Reanuda reloj");
+
+        for (int i = 0; i < 100; i++) {
+            j.actualizar();
+        }
+
+        verificar(
+            j.getTiempoRestante() == tiempo
+                && j.getNivel().getJugador().getX() == x,
+            "Pausa congela tiempo y personaje"
+        );
+
+        j.alternarPausa();
+        j.setDireccion(0, 0);
+        j.actualizar();
+
+        verificar(
+            j.getTiempoRestante() < tiempo,
+            "Reanuda reloj"
+        );
+
         Personaje cliente = j.getNivel().getPersonajes().get(1);
-        j.getNivel().getJugador().setPosicion(cliente.getX(), cliente.getY());
-        double antes = j.getTiempoRestante(); j.actualizar();
-        verificar(antes - j.getTiempoRestante() >= 5, "Choque descuenta tiempo");
-        antes = j.getTiempoRestante(); j.actualizar();
-        verificar(antes - j.getTiempoRestante() < 1, "Inmunidad evita penalizacion por cada frame");
+        j.getNivel().getJugador().setPosicion(
+            cliente.getX(), cliente.getY()
+        );
+
+        double antes = j.getTiempoRestante();
+        j.actualizar();
+
+        verificar(
+            antes - j.getTiempoRestante() >= 5,
+            "Choque descuenta tiempo"
+        );
+
+        antes = j.getTiempoRestante();
+        j.actualizar();
+
+        verificar(
+            antes - j.getTiempoRestante() < 1,
+            "Inmunidad evita penalizacion por cada frame"
+        );
+
+    // PRUEBA DEL TEMPORIZADOR - J1
         j = nuevo();
-        for (int i = 0; i < 10810; i++) j.actualizar();
-        verificar(j.getEstado() == Juego.Estado.DERROTA && j.getTiempoRestante() == 0, "Derrota al agotarse reloj");
-        j.iniciarPartida(); verificar(j.getEstado() == Juego.Estado.JUGANDO && j.getPuntuacion() == 0 && j.getNivel().getEntregados() == 0, "Reinicio limpio");
+
+        verificar(
+            j.getTiempoRestante() == 180,
+            "El nivel debe iniciar con 180 segundos"
+        );
+
+        int actualizaciones = (int) Math.ceil(
+            j.getNivel().getTiempoLimite() / Personaje.PASO
+        ) + 10;
+
+        for (int i = 0; i < actualizaciones; i++) {
+            j.actualizar();
+        }
+
+        verificar(
+            j.getEstado() == Juego.Estado.DERROTA
+                && j.getTiempoRestante() == 0,
+            "Derrota al agotarse el reloj"
+        );
+
+        j.iniciarPartida();
+
+        verificar(
+            j.getEstado() == Juego.Estado.JUGANDO
+                && j.getPuntuacion() == 0
+                && j.getNivel().getEntregados() == 0,
+            "Reinicio limpio"
+        );
     }
 
     /** Busca y recorre rutas reales por el mapa; no teletransporta entre los objetivos. */

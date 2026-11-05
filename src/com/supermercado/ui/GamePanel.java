@@ -209,9 +209,16 @@ public final class GamePanel extends JPanel {
         Juego.Estado e = juego.getEstado();
         String etiqueta, titulo, linea1, linea2, boton;
         if (e == Juego.Estado.MENU) {
-            etiqueta = "TURNO 01 / REPOSICIÓN"; titulo = "¿Listo para el caos?";
-            linea1 = "Organiza 6 productos en 3 minutos.";
-            linea2 = "WASD o flechas para moverte. E para interactuar."; boton = "ENTER  ·  COMENZAR";
+            etiqueta = "TURNO 01 / REPOSICIÓN";
+            titulo = "¿Listo para el caos?";
+
+            int tiempo = (int) juego.getNivel().getTiempoLimite();
+
+            linea1 = "Organiza 6 productos en "
+                    + tiempo + " segundos.";
+
+            linea2 = "WASD o flechas para moverte. E para interactuar.";
+            boton = "ENTER  ·  COMENZAR";
         } else if (e == Juego.Estado.PAUSA) {
             etiqueta = "RELOJ DETENIDO"; titulo = "Una pequeña pausa";
             linea1 = "La partida y los clientes están detenidos.";
