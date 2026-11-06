@@ -1,2 +1,0 @@
-test/com/supermercado/PruebasCampana.java
-test/com/supermercado/PruebasJuego.java

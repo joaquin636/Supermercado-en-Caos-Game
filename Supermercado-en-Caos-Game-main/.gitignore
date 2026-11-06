@@ -1,7 +1,0 @@
-out/
-build/
-*.class
-.idea/workspace.xml
-.idea/shelf/
-*.log
-.DS_Store
