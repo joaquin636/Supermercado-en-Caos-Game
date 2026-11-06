@@ -53,6 +53,7 @@ public final class GamePanel extends JPanel {
 
     /** Se separa del Timer para poder comprobar controles y simulacion sin una ventana. */
     public void avanzarFotograma(double segundos) {
+        if (!Double.isFinite(segundos)) throw new IllegalArgumentException("Duracion no finita.");
         animacion += Math.max(0, Math.min(segundos, .15));
         boolean arriba = teclado.consumir(KeyEvent.VK_UP) | teclado.consumir(KeyEvent.VK_W);
         boolean abajo = teclado.consumir(KeyEvent.VK_DOWN) | teclado.consumir(KeyEvent.VK_S);
@@ -75,14 +76,25 @@ public final class GamePanel extends JPanel {
                 repaint(); return;
             }
         }
-        if ((confirmar && estado != Juego.Estado.JUGANDO && estado != Juego.Estado.PAUSA)
+        boolean transicion = false;
+        if ((estado == Juego.Estado.MENU && confirmar)
                 || (reiniciar && (estado == Juego.Estado.VICTORIA || estado == Juego.Estado.DERROTA))) {
-            juego.iniciarPartida(); teclado.limpiar(); acumulador = 0;
+            juego.iniciarPartida(); transicion = true;
+        } else if (confirmar && estado == Juego.Estado.DERROTA) transicion = juego.reintentarNivel();
+        else if (confirmar && estado == Juego.Estado.VICTORIA) {
+            if (juego.isCampanaFinalizada()) { juego.iniciarPartida(); transicion = true; }
+            else transicion = juego.avanzarNivel();
         } else if (pausa) juego.alternarPausa();
+        if (transicion) {
+            teclado.limpiar(); acumulador = 0;
+            // El fotograma de confirmacion no mueve ni descuenta tiempo del nuevo nivel.
+            repaint(); return;
+        }
         juego.setDireccion(teclado.ejeX(), teclado.ejeY());
         if (interactuar) juego.interactuar();
         if (juego.getEstado() == Juego.Estado.JUGANDO) {
-            acumulador += Math.min(Math.max(segundos, 0), .15);
+            // Recuperar todos los pasos: un fotograma lento no debe regalar tiempo.
+            acumulador += Math.max(segundos, 0);
             while (acumulador + 1e-10 >= Personaje.PASO) {
                 juego.actualizar(); acumulador -= Personaje.PASO;
             }
@@ -129,7 +141,7 @@ public final class GamePanel extends JPanel {
         // Fachada y rotulos quedan fuera de la zona transitable.
         rect(g,12,40,488,12,0x5c7463);rect(g,16,42,480,3,0x91aa7e);
         texto(g,"MERCADO LA ESQUINA",26,49,8,CREMA);
-        texto(g,"REPOSICION / TURNO 01",336,49,7,CREMA);
+        texto(g,"REPOSICION / NIVEL "+juego.getNivelActual(),336,49,7,CREMA);
         Graphics2D m=(Graphics2D)g.create();m.translate(16,56);m.scale(.5,.5);
         for(Obstaculo o:juego.getNivel().getObstaculos()) estante(m,o);
         for(Producto p:juego.getNivel().getProductos())if(p.estaDisponible()) {
@@ -161,7 +173,7 @@ public final class GamePanel extends JPanel {
                 rect(g,x+3,y+27+fila*26,w-6,4,0xc4a071);
             }
             rect(g,x+2,y+57,w-4,16,color(e.getCategoria()));
-            texto(g,e.getCategoria()+" "+e.getRecibidos().size()+"/2",x+8,y+70,16,OSCURO);
+            texto(g,e.getCategoria()+" "+e.getRecibidos().size()+"/"+cantidadCategoria(e.getCategoria()),x+8,y+70,16,OSCURO);
             Producto mano=juego.getNivel().getJugador().getProductoEnMano();
             if(mano!=null&&e.aceptaProducto(mano)) {g.setColor(ORO);g.drawRect(x-3,y-3,w+6,h+6);}
         } else {
@@ -196,15 +208,30 @@ public final class GamePanel extends JPanel {
         else {rect(g,x+11,y+5,2,3,0x2e3938);rect(g,x+20,y+5,2,3,0x2e3938);}
         if(j&&((Jugador)p).getProductoEnMano()!=null)producto(g,((Jugador)p).getProductoEnMano(),x+23,y+12);
     }
+    private long cantidadCategoria(String categoria) {
+        return juego.getNivel().getProductos().stream().filter(p -> p.getCategoria().equals(categoria)).count();
+    }
+    public String getTextoTiempo() {
+        int t = (int)Math.ceil(juego.getTiempoRestante());
+        return String.format("TIEMPO %02d:%02d", t / 60, t % 60);
+    }
     private void hud(Graphics2D g) {
+
         texto(g,"SUPERMERCADO",16,17,10,CREMA);texto(g,"EN CAOS",16,31,13,ORO);
         int t=(int)Math.ceil(juego.getTiempoRestante());
-        texto(g,String.format("TIEMPO %02d:%02d",t/60,t%60),226,23,11,t<=30?new Color(235,119,83):CREMA);
+        texto(g,getTextoTiempo(),226,23,11,t<=30?new Color(235,119,83):CREMA);
         texto(g,"PTS "+String.format("%03d",juego.getPuntuacion()),421,23,11,ORO);
         marco(g,508,40,120,292);
-        texto(g,"LA LISTA",521,62,11,ORO);texto(g,"ORDENA 6",521,81,9,CREMA);texto(g,"PRODUCTOS",521,94,9,CREMA);
-        for(int i=0;i<6;i++) {
-            Producto p=juego.getNivel().getProductos().get(i);int y=119+i*23;
+        texto(g,"LA LISTA",521,62,11,ORO);texto(g,"OBJETIVO "+juego.getNivel().getObjetivoEntregas(),521,81,9,CREMA);texto(g,"PRODUCTOS",521,94,9,CREMA);
+        java.util.List<Producto> lista=juego.getNivel().getProductos();
+        int pendientes=0;
+        for(int i=0;i<lista.size();i++) {
+            if(!lista.get(i).isEntregado()) { pendientes=i; break; }
+        }
+        int inicio=Math.max(0, pendientes-5);
+        for(int i=inicio;i<Math.min(lista.size(),inicio+6);i++) {
+            Producto p=lista.get(i);int y=119+(i-inicio)*23;
+
             rect(g,520,y-8,7,7,p.isEntregado()?0x8ca654:0x596362);
             texto(g,p.getNombre(),533,y,8,CREMA);
         }
@@ -240,14 +267,14 @@ public final class GamePanel extends JPanel {
             texto(g,"ARRIBA / ABAJO   ELEGIR     ENTER   ACEPTAR",143,312,9,CREMA);
         } else if(instrucciones) {
             texto(g,"COMO JUGAR",240,103,17,ORO);
-            String[] lineas={"WASD o flechas: caminar por los pasillos.","E: recoger un producto cercano.","E junto al estante correcto: entregar.","Solo puedes llevar un producto a la vez.","6 entregas en 180 segundos = victoria.","Cada cliente que tocas resta 5 segundos.","P / ESC: pausar. Cambiar ventana pausa.","ENTER / ESC: volver al menu."};
+            String[] lineas={"WASD o flechas: caminar por los pasillos.","E: recoger un producto cercano.","E junto al estante correcto: entregar.","Un producto en mano. +100 por entrega.","Nivel 1: 6 entregas en 180 segundos.","Choque: -5 s; proteccion durante 1 s.","P / ESC: pausar. Cambiar ventana pausa.","ENTER / ESC: volver al menu."};
             for(int i=0;i<lineas.length;i++)texto(g,lineas[i],128,137+i*23,9,CREMA);
         } else {
-            String titulo=e==Juego.Estado.PAUSA?"TURNO EN PAUSA":e==Juego.Estado.VICTORIA?"TODO EN SU LUGAR":"SE ACABO EL TURNO";
+            String titulo=juego.isCampanaFinalizada()?"CAMPANA COMPLETA":e==Juego.Estado.PAUSA?"TURNO EN PAUSA":e==Juego.Estado.VICTORIA?"TODO EN SU LUGAR":"SE ACABO EL TURNO";
             texto(g,titulo,156,132,20,ORO);
-            texto(g,"Entregas: "+juego.getNivel().getEntregados()+" / 6   Puntos: "+juego.getPuntuacion(),163,178,12,CREMA);
-            texto(g,e==Juego.Estado.PAUSA?"P / ESC para continuar":"ENTER / R para volver a jugar",180,234,12,CREMA);
-            texto(g,e==Juego.Estado.VICTORIA?"La tienda esta lista para abrir.":e==Juego.Estado.PAUSA?"El reloj y los clientes estan detenidos.":"Prueba rutas cortas y evita los clientes.",147,286,9,CREMA);
+            texto(g,"Entregas: "+juego.getNivel().getEntregados()+" / "+juego.getNivel().getObjetivoEntregas()+"   Puntos: "+juego.getPuntuacion(),163,178,12,CREMA);
+            texto(g,e==Juego.Estado.PAUSA?"P / ESC para continuar":e==Juego.Estado.DERROTA?"ENTER reintenta / R nueva":juego.isCampanaFinalizada()?"ENTER / R nueva campana":juego.haySiguienteNivel()?"ENTER sigue / R nueva":"Pendiente / R nueva campana",180,234,12,CREMA);
+            texto(g,e==Juego.Estado.VICTORIA?(juego.haySiguienteNivel()?"Puntos conservados para el siguiente nivel.":juego.isCampanaFinalizada()?"Seis niveles superados.":"Faltan configuraciones del equipo."):e==Juego.Estado.PAUSA?"El reloj y los clientes estan detenidos.":"Prueba rutas cortas y evita los clientes.",147,286,9,CREMA);
         }
     }
 }

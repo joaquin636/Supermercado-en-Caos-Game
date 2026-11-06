@@ -12,6 +12,7 @@ import java.util.List;
 public final class Nivel {
     public static final int ANCHO = 960;
     public static final int ALTO = 540;
+    private final ConfiguracionNivel configuracion;
     private final int numero;
     private final double tiempoLimite;
     private Jugador jugador;
@@ -19,31 +20,43 @@ public final class Nivel {
     private final List<Obstaculo> obstaculos = new ArrayList<>();
     private final List<Producto> productos = new ArrayList<>();
 
-    public Nivel(int numero) {
-        if (numero != 1) throw new IllegalArgumentException("Este hito implementa solamente el nivel 1.");
-        this.numero = numero;
-        tiempoLimite = 60;
-        cargar();
+    public Nivel(int numero) { this(CatalogoNiveles.predeterminado().obtener(numero)); }
+
+    public Nivel(ConfiguracionNivel configuracion) {
+        this.configuracion = java.util.Objects.requireNonNull(configuracion);
+        numero = configuracion.getNumero(); tiempoLimite = configuracion.getTiempo(); cargar();
     }
 
     public void cargar() {
         personajes.clear(); obstaculos.clear(); productos.clear();
-        jugador = new Jugador("Repositor", 48, 42);
-        personajes.add(jugador);
-        personajes.add(new Cliente(240, 190, 0));
-        personajes.add(new Cliente(520, 285, 2));
-        personajes.add(new Cliente(830, 455, 2));
-        obstaculos.add(new Estante(Producto.FRUTAS, 170, 60));
-        obstaculos.add(new Estante(Producto.LACTEOS, 430, 60));
-        obstaculos.add(new Estante(Producto.LIMPIEZA, 690, 60));
-        obstaculos.add(new Obstaculo(310, 245, 90, 70));
-        obstaculos.add(new Obstaculo(600, 345, 100, 70));
-        productos.add(new Producto("Manzana", Producto.FRUTAS, 104, 220));
-        productos.add(new Producto("Platano", Producto.FRUTAS, 430, 455));
-        productos.add(new Producto("Leche", Producto.LACTEOS, 440, 270));
-        productos.add(new Producto("Yogur", Producto.LACTEOS, 140, 455));
-        productos.add(new Producto("Jabon", Producto.LIMPIEZA, 780, 235));
-        productos.add(new Producto("Detergente", Producto.LIMPIEZA, 815, 405));
+        jugador = new Jugador("Repositor", configuracion.getJugadorX(), configuracion.getJugadorY());
+        personajes.add(jugador); personajes.addAll(configuracion.crearClientes());
+        obstaculos.addAll(configuracion.crearObstaculos());
+        for (ConfiguracionNivel.ProductoInicial p : configuracion.getProductos()) productos.add(p.crear());
+        for (Personaje p : personajes) if (!posicionLibre(p.getX(), p.getY()))
+            throw new IllegalArgumentException("Personaje inicia dentro de un obstaculo.");
+        for (Producto p : productos) {
+            boolean tieneEstante = false;
+            for (Obstaculo o : obstaculos) {
+                if (o.bloqueaPaso() && o.getBounds().intersects(p.getBounds()))
+                    throw new IllegalArgumentException("Producto inicia dentro de un obstaculo.");
+                if (o instanceof Estante && ((Estante)o).getCategoria().equals(p.getCategoria())) tieneEstante = true;
+            }
+            if (!tieneEstante) throw new IllegalArgumentException("Producto sin estante de su categoria.");
+        }
+    }
+
+    public ConfiguracionNivel getConfiguracion() { return configuracion; }
+    public int getObjetivoEntregas() { return configuracion.getObjetivoEntregas(); }
+    public boolean permiteEntrega(Producto producto) {
+        if (!productos.contains(producto) || producto.isEntregado()) return false;
+        if (!configuracion.isEntregasEnOrden()) return true;
+        for (Producto p : productos) if (!p.isEntregado()) return p == producto;
+        return false;
+    }
+    public String getObjetivo() {
+        return "Entrega " + getObjetivoEntregas() + " productos"
+                + (configuracion.isEntregasEnOrden() ? " en el orden de la lista." : " en sus estantes.");
     }
 
     public void actualizarPersonajes() {
@@ -76,7 +89,7 @@ public final class Nivel {
     }
 
     public boolean estaCompletado() {
-        return !productos.isEmpty() && getEntregados() == productos.size();
+        return getEntregados() >= getObjetivoEntregas();
     }
     public int getEntregados() {
         int total = 0;

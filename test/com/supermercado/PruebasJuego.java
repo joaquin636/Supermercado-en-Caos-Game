@@ -30,8 +30,9 @@ public final class PruebasJuego {
     public static void main(String[] args) throws Exception {
         System.setProperty("java.awt.headless", "true");
         movimiento(); entregas(); estados(); recorridoCompleto();
+        PruebasCampana.ejecutar();
         SwingUtilities.invokeAndWait(() -> {
-            try { menu(); teclado(); renderizar(args.length == 0 ? "docs/capturas" : args[0]); }
+            try { menu(); teclado(); renderizar(args.length == 0 ? "build/capturas-pruebas" : args[0]); }
             catch (Exception e) { throw new RuntimeException(e); }
         });
         System.out.println("OK: " + comprobaciones + " comprobaciones. Movimiento, colisiones, entrega, partida, teclado y render.");
@@ -179,7 +180,9 @@ public final class PruebasJuego {
         verificar(j.getEstado()==Juego.Estado.JUGANDO,"Volver de instrucciones y jugar");
     }
     private static void renderizar(String carpeta) throws Exception {
-        File dir=new File(carpeta); if (!dir.isDirectory() && !dir.mkdirs()) throw new IllegalStateException("No se pudo crear carpeta de capturas");
+        File dir=new File(carpeta);
+        if (dir.getCanonicalFile().toPath().startsWith(new File("docs").getCanonicalFile().toPath()))
+            throw new IllegalArgumentException("Las pruebas no pueden escribir en docs."); if (!dir.isDirectory() && !dir.mkdirs()) throw new IllegalStateException("No se pudo crear carpeta de capturas");
         Juego j=new Juego();GamePanel panel=new GamePanel(j,false);panel.setSize(1280,800);
         guardar(panel,new File(dir,"01_menu.png"));
         j.iniciarPartida();guardar(panel,new File(dir,"02_partida.png"));
