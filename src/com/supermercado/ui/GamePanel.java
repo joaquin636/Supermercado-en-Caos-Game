@@ -143,7 +143,8 @@ public final class GamePanel extends JPanel {
         // Fachada y rotulos quedan fuera de la zona transitable.
         rect(g,12,40,488,12,0x5c7463);rect(g,16,42,480,3,0x91aa7e);
         texto(g,"MERCADO LA ESQUINA",26,49,8,CREMA);
-        texto(g,"REPOSICION / NIVEL "+juego.getNivelActual(),336,49,7,CREMA);
+        String rotulo = "N" + juego.getNivelActual() + " / " + juego.getNivel().getConfiguracion().getIdentificacion();
+        texto(g,rotulo.length() > 37 ? rotulo.substring(0, 37) : rotulo,336,49,7,CREMA);
         Graphics2D m=(Graphics2D)g.create();m.translate(16,56);m.scale(.5,.5);
         for(Obstaculo o:juego.getNivel().getObstaculos()) estante(m,o);
         for(Producto p:juego.getNivel().getProductos())if(p.estaDisponible()) {
@@ -197,6 +198,10 @@ public final class GamePanel extends JPanel {
     private void persona(Graphics2D g,Personaje p) {
         int x=(int)p.getX(),y=(int)p.getY();boolean j=p instanceof Jugador;
         rect(g,x+2,y+26,28,5,0x8d967c);
+        if (p instanceof Cliente cliente && juego.getEstado() == Juego.Estado.JUGANDO
+                && cliente.estaDescansando()) {
+            texto(g,"z",x+12,y-10,16,OSCURO);
+        }
         if(j&&((Jugador)p).esInmune()&&((int)(animacion*12)%2==0))return;
         int paso=(Math.abs(p.getDesplazamientoX())+Math.abs(p.getDesplazamientoY())>.01)?((int)(animacion*9)%2)*3:0;
         rect(g,x+6,y+22,7,8-paso,0x283d42);rect(g,x+19,y+22,7,5+paso,0x283d42);

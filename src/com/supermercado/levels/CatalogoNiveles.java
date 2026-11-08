@@ -1,6 +1,8 @@
 package com.supermercado.levels;
 
 import com.supermercado.products.Producto;
+import com.supermercado.entities.Cliente;
+import com.supermercado.entities.movimiento.PatrullaConPausas;
 import java.util.*;
 
 /** Catalogo explicito: nunca sustituye un nivel faltante por otro inventado. */
@@ -30,13 +32,19 @@ public final class CatalogoNiveles {
             .producto("Leche", Producto.LACTEOS, 440, 270).producto("Yogur", Producto.LACTEOS, 140, 455)
             .producto("Jabon", Producto.LIMPIEZA, 780, 235).producto("Detergente", Producto.LIMPIEZA, 815, 405)
             .construir();
-        // Demostracion de J2, no pretende reemplazar el nivel definitivo de otro integrante.
-        ConfiguracionNivel demo = ConfiguracionNivel.crear(2, "Demo de configuracion")
-            .tiempo(120).jugador(48, 42).entregasEnOrden(true)
-            .estante(Producto.FRUTAS, 170, 60).estante(Producto.LACTEOS, 430, 60)
-            .caja(600, 345, 100, 70).cliente(700, 250, 2)
-            .producto("Manzana", Producto.FRUTAS, 104, 220).producto("Leche", Producto.LACTEOS, 440, 270)
+        // U3: tiempo inicial de balance. Mismo objetivo, rutas distintas y dos estrategias reales.
+        ConfiguracionNivel dos = ConfiguracionNivel.crear(2, "Pasillo concurrido")
+            .tiempo(165).jugador(48, 42)
+            .estante(Producto.FRUTAS, 90, 60).estante(Producto.LACTEOS, 390, 60)
+            .estante(Producto.LIMPIEZA, 690, 60)
+            .caja(280, 240, 90, 100).caja(580, 330, 100, 70)
+            .cliente(240, 190, 0)
+            .cliente(() -> new Cliente(480, 300, 2, new PatrullaConPausas(2, 1)))
+            .cliente(830, 450, 2)
+            .producto("Manzana", Producto.FRUTAS, 100, 230).producto("Platano", Producto.FRUTAS, 760, 440)
+            .producto("Leche", Producto.LACTEOS, 450, 250).producto("Yogur", Producto.LACTEOS, 140, 450)
+            .producto("Jabon", Producto.LIMPIEZA, 800, 230).producto("Detergente", Producto.LIMPIEZA, 470, 430)
             .construir();
-        return new CatalogoNiveles(List.of(uno, demo));
+        return new CatalogoNiveles(List.of(uno, dos));
     }
 }

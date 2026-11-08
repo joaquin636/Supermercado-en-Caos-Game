@@ -7,13 +7,31 @@ import com.supermercado.levels.*;
 import com.supermercado.products.Producto;
 import com.supermercado.obstacles.*;
 import com.supermercado.ui.GamePanel;
+import com.supermercado.ui.GameWindow;
 import java.awt.event.*;
 import java.util.List;
 import javax.swing.*;
+import java.awt.geom.Rectangle2D;
+import java.awt.image.BufferedImage;
+import java.nio.file.*;
+import java.util.*;
+import javax.imageio.ImageIO;
 
 /** Regresiones funcionales de las tareas U1, U2 y U3. Sin dependencias externas. */
 public final class PruebasJuan {
     private static int comprobaciones;
+
+    public static void main(String[] args) throws Exception {
+        if (args.length == 1 && args[0].equals("--demo-orden")) {
+            // Configuracion de demostracion, no agrega un nivel a la campana.
+            SwingUtilities.invokeLater(() -> new GameWindow(juegoObjetivo(true)));
+        } else if (args.length == 0) {
+            System.setProperty("java.awt.headless", "true");
+            ejecutar();
+        } else {
+            throw new IllegalArgumentException("Uso: PruebasJuan [--demo-orden]");
+        }
+    }
 
     private static void verificar(boolean condicion, String mensaje) {
         if (!condicion) throw new AssertionError(mensaje);
@@ -27,6 +45,7 @@ public final class PruebasJuan {
     public static void ejecutar() throws Exception {
         estrategias();
         entregas();
+        nivelDos();
         System.out.println("OK Juan: " + comprobaciones + " comprobaciones.");
     }
 
@@ -45,6 +64,7 @@ public final class PruebasJuan {
         MovimientoCliente estrategiaCompartida = new PatrullaConPausas();
         Cliente a = new Cliente(100, 200, 0, estrategiaCompartida);
         Cliente b = new Cliente(400, 200, 1, estrategiaCompartida);
+        verificar(!a.estaDescansando(), "No anuncia descanso antes de primera actualizacion");
         for (int i = 0; i < 120; i++) {
             a.update();
             verificar(a.getDesplazamientoX() > 0, "Marcha durante dos segundos activos");
@@ -54,9 +74,11 @@ public final class PruebasJuan {
             cerca(a.getDesplazamientoX(), 0, "Descansa durante un segundo activo");
         }
         b.update();
+        verificar(a.estaDescansando(), "HUD puede consultar descanso sin conocer estrategia concreta");
         verificar(b.getDesplazamientoY() > 0, "Dos clientes comparten estrategia sin compartir reloj");
         a.update();
         verificar(a.getDesplazamientoX() > 0, "Reanuda marcha al finalizar pausa");
+        verificar(!a.estaDescansando(), "Indicador desaparece al reanudar marcha");
 
         ConfiguracionNivel configuracion = ConfiguracionNivel.crear(1, "Prueba de colisiones Strategy")
                 .estante(Producto.FRUTAS, 170, 60).producto("A", Producto.FRUTAS, 100, 220)
@@ -185,5 +207,122 @@ public final class PruebasJuan {
         verificar(reinicio.reintentarNivel() && reinicio.getPuntuacion() == 0, "Reintento descarta puntos provisionales");
         verificar(reinicio.getNivel().getSiguienteProducto().getCategoria().equals(Producto.FRUTAS), "Reintento vuelve a la primera categoria");
         cerca(reinicio.getNivel().getProductos().get(1).getY(), 270, "Recarga restaura ubicacion original de producto soltado");
+    }
+
+    private static Juego entrarNivelDos() {
+        Juego j = new Juego(); j.iniciarPartida();
+        // Solo prepara el acceso por victoria normal; el recorrido del nivel 2 no teletransporta.
+        for (Producto p : j.getNivel().getProductos()) entregar(j, p);
+        verificar(j.avanzarNivel() && j.getNivelActual() == 2, "Nivel 2 accesible tras victoria del primero");
+        return j;
+    }
+
+    private static void nivelDos() throws Exception {
+        Juego j = entrarNivelDos();
+        Nivel nivel = j.getNivel();
+        verificar(nivel.getConfiguracion().getIdentificacion().equals("Pasillo concurrido"), "Se sustituye la demo por nivel 2");
+        verificar(nivel.getObjetivoEntregas() == 6 && !nivel.getConfiguracion().isEntregasEnOrden(), "Seis entregas libres en nivel 2");
+        int continuos = 0, conPausas = 0;
+        for (Personaje personaje : nivel.getPersonajes()) {
+            if (personaje instanceof Cliente cliente) {
+                if (cliente.getMovimiento() instanceof PatrullaConPausas) conPausas++;
+                if (cliente.getMovimiento() instanceof PatrullaRebote) continuos++;
+            }
+        }
+        verificar(continuos == 2 && conPausas == 1, "Nivel 2 configura las dos estrategias");
+        capturar(j, "juan-nivel2-inicio.png");
+        for (int i = 0; i < 121; i++) j.actualizar();
+        verificar(((Cliente) nivel.getPersonajes().get(2)).estaDescansando(), "Cliente con pausas descansa en partida real");
+        capturar(j, "juan-nivel2-cliente-descansando.png");
+        for (Producto p : nivel.getProductos()) {
+            caminar(j, p.getBounds()); j.interactuar();
+            verificar(nivel.getJugador().getProductoEnMano() == p, "Recorrido permite recoger " + p.getNombre());
+            Estante destino = null;
+            for (Obstaculo o : nivel.getObstaculos()) {
+                if (o instanceof Estante e && e.getCategoria().equals(p.getCategoria())) destino = e;
+            }
+            caminar(j, Objects.requireNonNull(destino).getBounds()); j.interactuar();
+            verificar(p.isEntregado(), "Recorrido permite entregar " + p.getNombre());
+        }
+        verificar(j.getEstado() == Juego.Estado.VICTORIA && j.getPuntuacion() == 1200,
+                "Gana nivel 2 con 600 puntos propios y conserva 600 del primero");
+        verificar(!j.isCampanaFinalizada() && !j.avanzarNivel(), "Nivel 3 sigue pendiente; no inventa final de campana");
+        System.out.printf("Nivel 2 recorrido a velocidad real: 6/6, %.1f segundos restantes.%n", j.getTiempoRestante());
+        capturar(j, "juan-nivel2-victoria.png");
+
+        // La demo de orden se puede inspeccionar sin editar el catalogo del producto.
+        Juego demo = juegoObjetivo(true);
+        recoger(demo, demo.getNivel().getProductos().get(1));
+        acercarEstante(demo, Producto.LACTEOS); demo.interactuar();
+        capturar(demo, "juan-orden-rechazado.png");
+
+        Juego derrota = entrarNivelDos();
+        recoger(derrota, derrota.getNivel().getProductos().get(0));
+        acercarEstante(derrota, Producto.FRUTAS); derrota.interactuar();
+        for (int i = 0; i < 10000 && derrota.getEstado() == Juego.Estado.JUGANDO; i++) derrota.actualizar();
+        verificar(derrota.getEstado() == Juego.Estado.DERROTA, "Nivel 2 se puede perder por reloj");
+        verificar(derrota.reintentarNivel() && derrota.getPuntuacion() == 600, "Reintenta nivel 2 conservando solo puntos previos");
+        verificar(derrota.getNivel().getEntregados() == 0 && derrota.getTiempoRestante() == 165, "Reintento restaura objetos y tiempo de nivel 2");
+        Cliente cliente = (Cliente) derrota.getNivel().getPersonajes().get(2);
+        cliente.update();
+        verificar(cliente.getDesplazamientoX() < 0, "Reintento restaura fase inicial de cliente con pausas");
+    }
+
+    /** BFS solo planea rutas estaticas. Cada arista se ejecuta mediante direccion y ticks del Juego. */
+    private static void caminar(Juego juego, Rectangle2D objetivo) {
+        Nivel nivel = juego.getNivel(); Jugador jugador = nivel.getJugador();
+        final int celda = 7;
+        double origenX = jugador.getX() % celda, origenY = jugador.getY() % celda;
+        int columnas = (int) ((Nivel.ANCHO - Personaje.TAMANO - origenX) / celda) + 1;
+        int filas = (int) ((Nivel.ALTO - Personaje.TAMANO - origenY) / celda) + 1;
+        int inicio = (int) Math.round((jugador.getY() - origenY) / celda) * columnas
+                + (int) Math.round((jugador.getX() - origenX) / celda);
+        int[] anteriores = new int[columnas * filas]; Arrays.fill(anteriores, -1);
+        anteriores[inicio] = inicio;
+        ArrayDeque<Integer> cola = new ArrayDeque<>(); cola.add(inicio);
+        int[][] direcciones = {{1,0},{-1,0},{0,1},{0,-1}};
+        int fin = -1;
+        while (!cola.isEmpty()) {
+            int actual = cola.remove(); int gx = actual % columnas, gy = actual / columnas;
+            double x = origenX + gx * celda, y = origenY + gy * celda;
+            if (Obstaculo.distancia(new Rectangle2D.Double(x, y, 30, 30), objetivo) <= 20) { fin = actual; break; }
+            for (int[] direccion : direcciones) {
+                int nx = gx + direccion[0], ny = gy + direccion[1];
+                if (nx < 0 || ny < 0 || nx >= columnas || ny >= filas) continue;
+                int siguiente = ny * columnas + nx;
+                if (anteriores[siguiente] != -1) continue;
+                boolean libre = true;
+                for (int paso = 1; paso <= 2; paso++) {
+                    if (!nivel.posicionLibre(x + direccion[0] * 3.5 * paso, y + direccion[1] * 3.5 * paso)) libre = false;
+                }
+                if (libre) { anteriores[siguiente] = actual; cola.add(siguiente); }
+            }
+        }
+        verificar(fin != -1, "Existe ruta accesible a objetivo del nivel 2");
+        List<Integer> ruta = new ArrayList<>();
+        for (int v = fin; v != inicio; v = anteriores[v]) ruta.add(v);
+        Collections.reverse(ruta);
+        for (int v : ruta) {
+            double x = origenX + (v % columnas) * celda, y = origenY + (v / columnas) * celda;
+            juego.setDireccion((int) Math.signum(x - jugador.getX()), (int) Math.signum(y - jugador.getY()));
+            juego.actualizar(); juego.actualizar(); // 210/60 = 3.5 unidades por tick: dos ticks por arista.
+            verificar(juego.getEstado() == Juego.Estado.JUGANDO, "Reloj permite llegar a cada objetivo");
+            cerca(jugador.getX(), x, "Jugador avanza horizontalmente sin teletransporte");
+            cerca(jugador.getY(), y, "Jugador avanza verticalmente sin teletransporte");
+        }
+        juego.setDireccion(0, 0);
+    }
+
+    private static void capturar(Juego juego, String nombre) throws Exception {
+        SwingUtilities.invokeAndWait(() -> {
+            try {
+                GamePanel panel = new GamePanel(juego, false); panel.setSize(1280, 800);
+                BufferedImage imagen = new BufferedImage(1280, 800, BufferedImage.TYPE_INT_RGB);
+                java.awt.Graphics2D g = imagen.createGraphics(); panel.paint(g); g.dispose();
+                Path destino = Path.of("build/capturas-pruebas", nombre);
+                Files.createDirectories(destino.getParent());
+                verificar(ImageIO.write(imagen, "png", destino.toFile()), "Captura Swing generada");
+            } catch (Exception e) { throw new RuntimeException(e); }
+        });
     }
 }

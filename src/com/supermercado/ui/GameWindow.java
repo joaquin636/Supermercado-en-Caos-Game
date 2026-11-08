@@ -1,5 +1,6 @@
 package com.supermercado.ui;
 
+import com.supermercado.game.Juego;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
@@ -10,8 +11,13 @@ public final class GameWindow extends JFrame {
     private final GamePanel panel;
 
     public GameWindow() {
+        this(new Juego());
+    }
+
+    /** Permite demostrar una configuracion aislada usando la misma ventana y controles. */
+    public GameWindow(Juego juego) {
         super("Supermercado en Caos | Mercado La Esquina");
-        panel = new GamePanel();
+        panel = new GamePanel(juego, true);
         setContentPane(panel);
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         Rectangle area = GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds();

@@ -27,7 +27,7 @@ Los getters de objetos permiten interaccion del modelo; no se afirma inmutabilid
 GamePanel conserva el modelo original. Dibuja en una superficie reutilizable de 640x400 y escala por vecino mas cercano.
 El mapa tiene 960x540 unidades del modelo y se representa a la mitad dentro de esa superficie.
 Los sprites procedurales estan en estante, producto y persona. No hay motor externo ni recursos protegidos.
-Timer de Swing solicita fotogramas; el acumulador ejecuta pasos fijos de 1/60 s con limite de recuperacion de 0.15 s.
+Timer de Swing solicita fotogramas; el acumulador ejecuta pasos fijos de 1/60 s y recupera los pasos pendientes.
 No se atribuyen patrones State, Observer ni MVC formal. Se separan modelo, entrada y presentacion por responsabilidad.
 
 ## Integracion de Juan

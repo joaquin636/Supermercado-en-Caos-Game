@@ -31,4 +31,7 @@ public final class Cliente extends Personaje {
     public void cambiarDireccion() { direccion = (direccion + 2) % 4; }
     public int getDireccion() { return direccion; }
     public MovimientoCliente getMovimiento() { return movimiento; }
+    public boolean estaDescansando() {
+        return actualizaciones > 0 && getDesplazamientoX() == 0 && getDesplazamientoY() == 0;
+    }
 }
