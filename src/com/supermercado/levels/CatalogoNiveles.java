@@ -1,6 +1,8 @@
 package com.supermercado.levels;
 
 import com.supermercado.products.Producto;
+import com.supermercado.entities.Cliente;
+import com.supermercado.entities.movimiento.PatrullaConPausas;
 import java.util.*;
 
 /** Catalogo explicito: nunca sustituye un nivel faltante por otro inventado. */
@@ -30,13 +32,19 @@ public final class CatalogoNiveles {
             .producto("Leche", Producto.LACTEOS, 440, 270).producto("Yogur", Producto.LACTEOS, 140, 455)
             .producto("Jabon", Producto.LIMPIEZA, 780, 235).producto("Detergente", Producto.LIMPIEZA, 815, 405)
             .construir();
-        // Demostracion de J2, no pretende reemplazar el nivel definitivo de otro integrante.
-        ConfiguracionNivel demo = ConfiguracionNivel.crear(2, "Demo de configuracion")
-            .tiempo(120).jugador(48, 42).entregasEnOrden(true)
-            .estante(Producto.FRUTAS, 170, 60).estante(Producto.LACTEOS, 430, 60)
-            .caja(600, 345, 100, 70).cliente(700, 250, 2)
-            .producto("Manzana", Producto.FRUTAS, 104, 220).producto("Leche", Producto.LACTEOS, 440, 270)
+        // U3: tiempo inicial de balance. Mismo objetivo, rutas distintas y dos estrategias reales.
+        ConfiguracionNivel dos = ConfiguracionNivel.crear(2, "Pasillo concurrido")
+            .tiempo(135).jugador(48, 42)
+            .estante(Producto.FRUTAS, 80, 60).estante(Producto.LACTEOS, 690, 230)
+            .estante(Producto.LIMPIEZA, 100, 420)
+            .caja(390, 100, 80, 160).caja(390, 340, 80, 140).caja(670, 70, 110, 70)
+            .cliente(170, 300, 0)
+            .cliente(() -> new Cliente(540, 380, 2, new PatrullaConPausas(2, 1)))
+            .cliente(580, 470, 3).cliente(320, 170, 1)
+            .producto("Manzana", Producto.FRUTAS, 100, 220).producto("Platano", Producto.FRUTAS, 820, 70)
+            .producto("Leche", Producto.LACTEOS, 790, 410).producto("Yogur", Producto.LACTEOS, 250, 330)
+            .producto("Jabon", Producto.LIMPIEZA, 550, 110).producto("Detergente", Producto.LIMPIEZA, 550, 450)
             .construir();
-        return new CatalogoNiveles(List.of(uno, demo));
+        return new CatalogoNiveles(List.of(uno, dos));
     }
 }

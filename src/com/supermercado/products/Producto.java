@@ -13,8 +13,8 @@ public final class Producto {
     private final int puntos;
     private boolean entregado;
     private boolean recogido;
-    private final double x;
-    private final double y;
+    private double x;
+    private double y;
 
     public Producto(String nombre, String categoria, double x, double y) {
         this.nombre = nombre; this.categoria = categoria;
@@ -23,6 +23,15 @@ public final class Producto {
 
     public void marcarRecogido() { if (!entregado) recogido = true; }
     public void marcarEntregado() { if (recogido) { entregado = true; recogido = false; } }
+    /** Solo un producto transportado puede volver al suelo. No altera los puntos. */
+    public boolean soltar(double x, double y) {
+        if (!recogido || entregado) return false;
+        if (!Double.isFinite(x) || !Double.isFinite(y) || x < 0 || y < 0)
+            throw new IllegalArgumentException("Posicion de producto invalida.");
+        this.x = x; this.y = y;
+        recogido = false;
+        return true;
+    }
     public boolean estaDisponible() { return !entregado && !recogido; }
     public Rectangle2D.Double getBounds() { return new Rectangle2D.Double(x, y, TAMANO, TAMANO); }
     public double distanciaA(Rectangle2D otro) { return Obstaculo.distancia(getBounds(), otro); }

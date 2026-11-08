@@ -85,7 +85,7 @@ public final class ConfiguracionNivel {
             if (cantidad < 1) throw new IllegalArgumentException("Objetivo positivo requerido");
             objetivoEntregas = cantidad; return this;
         }
-        /** Repetir este metodo define cantidades y posiciones; el orden de alta es el de entrega. */
+        /** El orden de alta define la secuencia de categorias si entregasEnOrden es true. */
         public Builder producto(String nombre, String categoria, double x, double y) {
             productos.add(new ProductoInicial(nombre, categoria, x, y)); return this;
         }

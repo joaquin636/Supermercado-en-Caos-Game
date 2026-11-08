@@ -73,7 +73,7 @@ public final class PruebasCampana {
         CatalogoNiveles c=CatalogoNiveles.predeterminado();
         Nivel uno=new Nivel(c.obtener(1)), otro=new Nivel(c.obtener(1)), dos=new Nivel(c.obtener(2));
         verificar(uno.getProductos().size()==6 && uno.getPersonajes().size()==4 && uno.getObstaculos().size()==5,"Conserva mapa original");
-        verificar(dos.getProductos().size()==2 && dos.getTiempoLimite()==120,"Segunda configuracion distinta");
+        verificar(dos.getProductos().size()==6 && dos.getTiempoLimite()==135,"Nivel 2 con seis entregas y tiempo propio");
         verificar(uno.getJugador()!=otro.getJugador() && uno.getProductos().get(0)!=otro.getProductos().get(0)
             && uno.getPersonajes().get(1)!=otro.getPersonajes().get(1) && uno.getObstaculos().get(0)!=otro.getObstaculos().get(0),"Entidades independientes entre cargas");
         Producto anterior=uno.getProductos().get(0); anterior.marcarRecogido(); uno.cargar();
@@ -94,11 +94,18 @@ public final class PruebasCampana {
             .cliente(() -> {fabricados[0]++; return new Cliente(500,300,1);}).construir();
         Nivel conCliente=new Nivel(clientes); conCliente.cargar();
         verificar(fabricados[0]==2,"Invoca fabrica de comportamiento por cada intento");
-        Juego orden=new Juego(); orden.iniciarPartida(); completar(orden); verificar(orden.avanzarNivel(),"Avanza a demo ordenada");
+        // Fixture pequeno ordenado: el nivel 2 del producto ahora es libre y tiene seis entregas.
+        ConfiguracionNivel demoOrdenada=ConfiguracionNivel.crear(2,"Fixture de secuencia")
+            .tiempo(120).entregasEnOrden(true)
+            .estante(Producto.FRUTAS,170,60).estante(Producto.LACTEOS,430,60)
+            .producto("Manzana",Producto.FRUTAS,104,220).producto("Leche",Producto.LACTEOS,440,270).construir();
+        Juego orden=new Juego(new CatalogoNiveles(List.of(c.obtener(1), demoOrdenada)));
+        orden.iniciarPartida(); completar(orden); verificar(orden.avanzarNivel(),"Avanza a fixture ordenado");
         Producto segundo=orden.getNivel().getProductos().get(1);
         orden.getNivel().getJugador().setPosicion(segundo.getX(),segundo.getY()); orden.interactuar();
-        verificar(orden.getNivel().getJugador().getProductoEnMano()==null && orden.getPuntuacion()==600,"Evita recoger fuera de orden y quedar atrapado");
+        verificar(orden.getNivel().getJugador().getProductoEnMano()==segundo && orden.getPuntuacion()==600,"Recoger fuera de orden no suma");
         verificar(!orden.getNivel().permiteEntrega(segundo),"Regla de entrega ordenada rechaza segundo");
+        orden.soltarProducto();
         completar(orden); verificar(orden.getPuntuacion()==800,"Demo ordenada se completa");
         verificar(!orden.avanzarNivel() && orden.getNivelActual()==2 && orden.getEstado()==Juego.Estado.VICTORIA
             && !orden.isCampanaFinalizada(),"Falta nivel 3: no salta ni declara campana finalizada");
@@ -158,12 +165,12 @@ public final class PruebasCampana {
         panel.avanzarFotograma(.1); cerca(j.getTiempoRestante(),179.9,"Panel actualiza modelo a pasos fijos");
         panel.avanzarFotograma(.5); cerca(j.getTiempoRestante(),179.4,"Fotograma lento no pierde tiempo real");
         completar(j);pulsar(panel,KeyEvent.VK_ENTER);
-        verificar(j.getNivelActual()==2 && j.getPuntuacion()==600 && panel.getTextoTiempo().equals("TIEMPO 02:00"),"Enter avanza y HUD sincroniza tiempo y puntaje");
+        verificar(j.getNivelActual()==2 && j.getPuntuacion()==600 && panel.getTextoTiempo().equals("TIEMPO 02:15"),"Enter avanza y HUD sincroniza tiempo y puntaje");
         captura(panel,"08_nivel2.png");
         entregar(j,0);agotar(j);pulsar(panel,KeyEvent.VK_ENTER);
-        verificar(j.getNivelActual()==2 && j.getPuntuacion()==600 && j.getTiempoRestante()==120,"Enter reintenta sin perder progreso previo");
+        verificar(j.getNivelActual()==2 && j.getPuntuacion()==600 && j.getTiempoRestante()==135,"Enter reintenta sin perder progreso previo");
         captura(panel,"09_reintento.png");
-        panel.avanzarFotograma(.5); cerca(j.getTiempoRestante(),119.5,"Fotograma lento tras reintento conserva tiempo real");
+        panel.avanzarFotograma(.5); cerca(j.getTiempoRestante(),134.5,"Fotograma lento tras reintento conserva tiempo real");
         completar(j);pulsar(panel,KeyEvent.VK_ENTER);verificar(j.getNivelActual()==2,"UI conserva victoria cuando falta nivel");
         captura(panel,"10_pendiente.png");pulsar(panel,KeyEvent.VK_R);
         verificar(j.getNivelActual()==1 && j.getPuntuacion()==0,"R inicia nueva campana desde victoria");

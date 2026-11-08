@@ -46,6 +46,12 @@ public final class Jugador extends Personaje {
         return true;
     }
 
+    public boolean soltarProducto() {
+        if (productoEnMano == null || !productoEnMano.soltar(getX(), getY())) return false;
+        productoEnMano = null;
+        return true;
+    }
+
     /** Un choque solo penaliza una vez por segundo, no una vez por fotograma. */
     public boolean recibirImpacto() {
         if (inmunidad > 0) return false;

@@ -84,14 +84,18 @@ public final class Juego {
         if (enMano == null) {
             Producto p = nivel.productoCercano();
             if (p == null) { avisar("Acercate un poco mas a un producto."); return; }
-            if (!nivel.permiteEntrega(p)) { avisar("Recoge primero el siguiente producto de la lista."); return; }
             j.recogerProducto(p);
             avisar("Llevas " + p.getNombre() + ". Buscale el estante de " + p.getCategoria() + ".");
         } else {
             Estante e = nivel.estanteCercano();
             if (e == null) { avisar("Lleva el producto cerca de su estante y pulsa E."); return; }
             if (!e.aceptaProducto(enMano)) { avisar("Estante incorrecto: este producto pertenece a " + enMano.getCategoria() + "."); return; }
-            if (!nivel.permiteEntrega(enMano)) { avisar("Entrega primero los productos anteriores de la lista."); return; }
+            if (!nivel.permiteEntrega(enMano)) {
+                Producto siguiente = nivel.getSiguienteProducto();
+                avisar("Fuera de orden. Sigue: " + (siguiente == null ? "objetivo completado" : siguiente.getCategoria())
+                        + ". Conservas el producto. Q: dejar en suelo.");
+                return;
+            }
             if (j.entregarProducto(e)) {
                 puntuacion += enMano.getPuntos();
                 avisar("Entrega correcta: +" + enMano.getPuntos() + " puntos.");
@@ -107,6 +111,10 @@ public final class Juego {
     public void alternarPausa() {
         if (estado == Estado.JUGANDO) { estado = Estado.PAUSA; nivel.getJugador().setDireccion(0, 0); }
         else if (estado == Estado.PAUSA) estado = Estado.JUGANDO;
+    }
+    public void soltarProducto() {
+        if (estado != Estado.JUGANDO) return;
+        if (nivel.getJugador().soltarProducto()) avisar("Producto en el suelo. E: recoger de nuevo.");
     }
     public void pausar() { if (estado == Estado.JUGANDO) alternarPausa(); }
     public void terminarPartida() {
@@ -132,8 +140,11 @@ public final class Juego {
 
     public String getAyudaContextual() {
         Jugador j = nivel.getJugador();
-        if (j.getProductoEnMano() != null) return "E: entregar en el estante de " + j.getProductoEnMano().getCategoria();
+        Producto siguiente = nivel.getSiguienteProducto();
+        String orden = siguiente == null ? "" : " Sigue: " + siguiente.getCategoria() + ".";
+        if (j.getProductoEnMano() != null) return "E: entregar en " + j.getProductoEnMano().getCategoria()
+                + ". Q: dejar en suelo." + orden;
         Producto p = nivel.productoCercano();
-        return p == null ? "Busca productos en el suelo. WASD o flechas para moverte." : "E: recoger " + p.getNombre();
+        return (p == null ? "Busca productos en el suelo. WASD o flechas para moverte." : "E: recoger " + p.getNombre()) + orden;
     }
 }

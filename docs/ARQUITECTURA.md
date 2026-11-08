@@ -27,5 +27,17 @@ Los getters de objetos permiten interaccion del modelo; no se afirma inmutabilid
 GamePanel conserva el modelo original. Dibuja en una superficie reutilizable de 640x400 y escala por vecino mas cercano.
 El mapa tiene 960x540 unidades del modelo y se representa a la mitad dentro de esa superficie.
 Los sprites procedurales estan en estante, producto y persona. No hay motor externo ni recursos protegidos.
-Timer de Swing solicita fotogramas; el acumulador ejecuta pasos fijos de 1/60 s con limite de recuperacion de 0.15 s.
+Timer de Swing solicita fotogramas; el acumulador ejecuta pasos fijos de 1/60 s y recupera los pasos pendientes.
 No se atribuyen patrones State, Observer ni MVC formal. Se separan modelo, entrada y presentacion por responsabilidad.
+
+## Integracion de Juan
+
+Cliente delega su solicitud de desplazamiento en MovimientoCliente (Strategy). PatrullaRebote
+conserva el algoritmo original; PatrullaConPausas alterna marcha y descanso. Nivel mantiene las
+colisiones. El reloj de comportamiento pertenece a cada Cliente, no a la estrategia compartida.
+
+Nivel selecciona ReglaEntregas segun ConfiguracionNivel.entregasEnOrden. EntregasLibres y
+EntregasEnOrden validan el objetivo a partir de los productos actuales. La secuencia es por
+categorias, no por identidad del objeto. getSiguienteProducto permite comunicarla en la HUD.
+Juego solo suma despues de confirmar la entrega. Q permite devolver al suelo el producto en mano;
+recargar el nivel restaura las posiciones originales. Ver GUIA_JUAN.md para el recorrido del codigo.
