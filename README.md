@@ -29,6 +29,7 @@ El nivel 1 conserva sus seis entregas y dispone de 180 segundos (3 minutos). Se 
 * **Navegación en Menús:** Teclas `Arriba` / `Abajo` o `W` / `S`. Presionar `Enter` para seleccionar *Jugar/Iniciar*, *Instrucciones* o *Salir*.
 * **Movimiento del Personaje:** Teclas `WASD` o `Flechas direccionales`.
 * **Interacción (`E`):** Presionar la tecla `E` estando cerca de un objeto para recogerlo del suelo o entregarlo en su estante.
+* **Dejar producto (`Q`):** Deja lo transportado en la posicion actual y libera la mano. Permite corregir una recogida fuera de turno.
 * **Pausa (`P` / `ESC`):** Pausa o reanuda la partida. Cambiar el foco de la ventana pausa el juego automáticamente y limpia las teclas presionadas.
 * **Victoria (`Enter`):** Avanza al siguiente nivel disponible; si falta su configuración, conserva el resultado y lo indica.
 * **Derrota (`Enter`):** Reintenta el nivel actual y restaura la puntuación anterior al intento.
@@ -39,6 +40,7 @@ El nivel 1 conserva sus seis entregas y dispone de 180 segundos (3 minutos). Se 
 ## 🎯 Objetivo y Reglas de Juego
 
 * **Transporte:** El repositor solo puede llevar un producto a la vez.
+* **Entregas ordenadas:** Cuando la configuracion lo requiere, las categorias de la lista definen la secuencia. La HUD muestra `SIGUE`. Una entrega fuera de turno conserva el producto y no da puntos. Se puede dejar con Q; los productos de la misma categoria son intercambiables.
 * **Puntuación:** Cada entrega realizada en la categoría correcta otorga **+100 puntos**.
 * **Obstáculos:** Las cajas y los estantes actúan como objetos sólidos que bloquean el paso.
 * **Clientes:** Los clientes patrullan por la tienda. Al chocar con ellos, se aplican **-5 segundos** de penalización al reloj, otorgando **1 segundo de inmunidad temporal** tras el contacto.

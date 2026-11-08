@@ -5,6 +5,11 @@ import com.supermercado.entities.movimiento.*;
 import com.supermercado.game.Juego;
 import com.supermercado.levels.*;
 import com.supermercado.products.Producto;
+import com.supermercado.obstacles.*;
+import com.supermercado.ui.GamePanel;
+import java.awt.event.*;
+import java.util.List;
+import javax.swing.*;
 
 /** Regresiones funcionales de las tareas U1, U2 y U3. Sin dependencias externas. */
 public final class PruebasJuan {
@@ -21,6 +26,7 @@ public final class PruebasJuan {
 
     public static void ejecutar() throws Exception {
         estrategias();
+        entregas();
         System.out.println("OK Juan: " + comprobaciones + " comprobaciones.");
     }
 
@@ -86,5 +92,98 @@ public final class PruebasJuan {
         boolean rechazo = false;
         try { new PatrullaConPausas(0, 1); } catch (IllegalArgumentException e) { rechazo = true; }
         verificar(rechazo, "Rechaza duracion de marcha invalida");
+    }
+
+    private static Juego juegoObjetivo(boolean ordenado) {
+        ConfiguracionNivel c = ConfiguracionNivel.crear(1, "Secuencia fruta lacteo fruta")
+                .entregasEnOrden(ordenado)
+                .estante(Producto.FRUTAS, 170, 60).estante(Producto.LACTEOS, 430, 60)
+                .producto("Manzana", Producto.FRUTAS, 100, 220)
+                .producto("Leche", Producto.LACTEOS, 440, 270)
+                .producto("Platano", Producto.FRUTAS, 400, 400).construir();
+        Juego j = new Juego(new CatalogoNiveles(List.of(c)));
+        j.iniciarPartida();
+        return j;
+    }
+
+    private static void recoger(Juego j, Producto producto) {
+        j.getNivel().getJugador().setPosicion(producto.getX(), producto.getY());
+        j.interactuar();
+        verificar(j.getNivel().getJugador().getProductoEnMano() == producto, "Recogida mediante interaccion real");
+    }
+
+    private static void acercarEstante(Juego j, String categoria) {
+        for (Obstaculo o : j.getNivel().getObstaculos()) {
+            if (o instanceof Estante && ((Estante) o).getCategoria().equals(categoria)) {
+                j.getNivel().getJugador().setPosicion(o.getX() + 15, o.getY() + o.getAlto() + 2);
+                return;
+            }
+        }
+        throw new AssertionError("No hay estante destino");
+    }
+
+    private static void entregar(Juego j, Producto producto) {
+        recoger(j, producto);
+        acercarEstante(j, producto.getCategoria());
+        j.interactuar();
+        verificar(producto.isEntregado(), "Entrega aceptada por regla y estante");
+    }
+
+    private static void entregas() throws Exception {
+        Juego j = juegoObjetivo(true);
+        Nivel nivel = j.getNivel();
+        Producto fruta = nivel.getProductos().get(0), leche = nivel.getProductos().get(1);
+        Producto otraFruta = nivel.getProductos().get(2);
+        verificar(nivel.getSiguienteProducto() == fruta, "Objetivo inicial consultable desde interfaz");
+        verificar(!nivel.permiteEntrega(null)
+                && !nivel.permiteEntrega(new Producto("Ajeno", Producto.FRUTAS, 100, 220)), "Rechaza productos ajenos");
+        recoger(j, leche);
+        acercarEstante(j, Producto.LACTEOS);
+        j.interactuar();
+        verificar(!leche.isEntregado() && j.getNivel().getJugador().getProductoEnMano() == leche,
+                "Entrega fuera de orden conserva el producto");
+        verificar(j.getPuntuacion() == 0 && nivel.getEntregados() == 0, "Entrega rechazada no suma ni avanza");
+        verificar(j.getMensaje().contains("Fuera de orden"), "Explica el rechazo al jugador");
+        j.pausar(); j.soltarProducto();
+        verificar(nivel.getJugador().getProductoEnMano() == leche, "Soltar no modifica partida pausada");
+        j.alternarPausa();
+
+        // Verifica Q a traves del mismo mapa de acciones que usa la ventana.
+        SwingUtilities.invokeAndWait(() -> {
+            GamePanel panel = new GamePanel(j, false);
+            Object accion = panel.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
+                    .get(KeyStroke.getKeyStroke(KeyEvent.VK_Q, 0, false));
+            verificar(accion != null, "Q registrada");
+            panel.getActionMap().get(accion).actionPerformed(new ActionEvent(panel, 0, "test"));
+            panel.avanzarFotograma(0);
+        });
+        verificar(nivel.getJugador().getProductoEnMano() == null && leche.estaDisponible(), "Q recupera mano y producto disponible");
+        cerca(leche.getX(), nivel.getJugador().getX(), "Producto queda donde esta el jugador");
+        verificar(nivel.posicionLibre(leche.getX(), leche.getY()), "Producto soltado no queda dentro de caja");
+        verificar(!leche.soltar(0, 0), "Soltar otra vez no teletransporta un producto del suelo");
+
+        entregar(j, otraFruta);
+        verificar(j.getPuntuacion() == 100 && nivel.getSiguienteProducto() == leche,
+                "Cualquier fruta satisface la categoria; avanza a lacteos");
+        entregar(j, leche);
+        verificar(nivel.getSiguienteProducto() == fruta, "Categoria repetida sigue pendiente");
+        entregar(j, fruta);
+        verificar(j.getEstado() == Juego.Estado.VICTORIA && j.getPuntuacion() == 300, "Victoria completa con secuencia de categorias");
+        verificar(nivel.getSiguienteProducto() == null && !nivel.permiteEntrega(fruta), "No hay objetivo despues de completar");
+        j.interactuar(); j.soltarProducto();
+        verificar(j.getPuntuacion() == 300 && !fruta.soltar(20, 20), "Victoria y producto entregado no se duplican");
+
+        Juego libre = juegoObjetivo(false);
+        verificar(libre.getNivel().getSiguienteProducto() == null, "Modo libre no impone siguiente categoria");
+        entregar(libre, libre.getNivel().getProductos().get(1));
+        verificar(libre.getPuntuacion() == 100, "Modo libre permite empezar por lacteos");
+
+        Juego reinicio = juegoObjetivo(true);
+        entregar(reinicio, reinicio.getNivel().getProductos().get(2));
+        recoger(reinicio, reinicio.getNivel().getProductos().get(1));
+        reinicio.soltarProducto(); reinicio.terminarPartida();
+        verificar(reinicio.reintentarNivel() && reinicio.getPuntuacion() == 0, "Reintento descarta puntos provisionales");
+        verificar(reinicio.getNivel().getSiguienteProducto().getCategoria().equals(Producto.FRUTAS), "Reintento vuelve a la primera categoria");
+        cerca(reinicio.getNivel().getProductos().get(1).getY(), 270, "Recarga restaura ubicacion original de producto soltado");
     }
 }

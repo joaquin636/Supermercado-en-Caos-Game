@@ -97,8 +97,9 @@ public final class PruebasCampana {
         Juego orden=new Juego(); orden.iniciarPartida(); completar(orden); verificar(orden.avanzarNivel(),"Avanza a demo ordenada");
         Producto segundo=orden.getNivel().getProductos().get(1);
         orden.getNivel().getJugador().setPosicion(segundo.getX(),segundo.getY()); orden.interactuar();
-        verificar(orden.getNivel().getJugador().getProductoEnMano()==null && orden.getPuntuacion()==600,"Evita recoger fuera de orden y quedar atrapado");
+        verificar(orden.getNivel().getJugador().getProductoEnMano()==segundo && orden.getPuntuacion()==600,"Recoger fuera de orden no suma");
         verificar(!orden.getNivel().permiteEntrega(segundo),"Regla de entrega ordenada rechaza segundo");
+        orden.soltarProducto();
         completar(orden); verificar(orden.getPuntuacion()==800,"Demo ordenada se completa");
         verificar(!orden.avanzarNivel() && orden.getNivelActual()==2 && orden.getEstado()==Juego.Estado.VICTORIA
             && !orden.isCampanaFinalizada(),"Falta nivel 3: no salta ni declara campana finalizada");

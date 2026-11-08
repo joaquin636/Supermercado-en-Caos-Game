@@ -66,6 +66,7 @@ public final class GamePanel extends JPanel {
         boolean pausa = teclado.consumir(KeyEvent.VK_P);
         pausa |= teclado.consumir(KeyEvent.VK_ESCAPE);
         boolean interactuar = teclado.consumir(KeyEvent.VK_E);
+        boolean soltar = teclado.consumir(KeyEvent.VK_Q);
         Juego.Estado estado = juego.getEstado();
         if (estado == Juego.Estado.MENU) {
             if (instrucciones) { if (confirmar || pausa) instrucciones = false; repaint(); return; }
@@ -91,7 +92,8 @@ public final class GamePanel extends JPanel {
             repaint(); return;
         }
         juego.setDireccion(teclado.ejeX(), teclado.ejeY());
-        if (interactuar) juego.interactuar();
+        if (soltar) juego.soltarProducto();
+        else if (interactuar) juego.interactuar();
         if (juego.getEstado() == Juego.Estado.JUGANDO) {
             // Recuperar todos los pasos: un fotograma lento no debe regalar tiempo.
             acumulador += Math.max(segundos, 0);
@@ -222,7 +224,9 @@ public final class GamePanel extends JPanel {
         texto(g,getTextoTiempo(),226,23,11,t<=30?new Color(235,119,83):CREMA);
         texto(g,"PTS "+String.format("%03d",juego.getPuntuacion()),421,23,11,ORO);
         marco(g,508,40,120,292);
-        texto(g,"LA LISTA",521,62,11,ORO);texto(g,"OBJETIVO "+juego.getNivel().getObjetivoEntregas(),521,81,9,CREMA);texto(g,"PRODUCTOS",521,94,9,CREMA);
+        texto(g,"LA LISTA",521,62,11,ORO);texto(g,"OBJETIVO "+juego.getNivel().getObjetivoEntregas(),521,81,9,CREMA);
+        Producto siguiente = juego.getNivel().getSiguienteProducto();
+        texto(g,siguiente == null ? "ORDEN LIBRE" : "SIGUE " + siguiente.getCategoria(),521,94,8,ORO);
         java.util.List<Producto> lista=juego.getNivel().getProductos();
         int pendientes=0;
         for(int i=0;i<lista.size();i++) {
@@ -248,7 +252,7 @@ public final class GamePanel extends JPanel {
             actual+=palabra+" ";
         }
         texto(g,actual,24,355+linea*11,9,CREMA);
-        texto(g,"WASD / FLECHAS  MOVER     E  INTERACTUAR     P / ESC  PAUSA",24,379,8,ORO);
+        texto(g,"WASD/FLECHAS MOVER   E INTERACTUAR   Q DEJAR   P/ESC PAUSA",24,379,8,ORO);
     }
     private void pantalla(Graphics2D g) {
         g.setColor(new Color(14,25,29,190));g.fillRect(0,0,640,400);
@@ -267,7 +271,7 @@ public final class GamePanel extends JPanel {
             texto(g,"ARRIBA / ABAJO   ELEGIR     ENTER   ACEPTAR",143,312,9,CREMA);
         } else if(instrucciones) {
             texto(g,"COMO JUGAR",240,103,17,ORO);
-            String[] lineas={"WASD o flechas: caminar por los pasillos.","E: recoger un producto cercano.","E junto al estante correcto: entregar.","Un producto en mano. +100 por entrega.","Nivel 1: 6 entregas en 180 segundos.","Choque: -5 s; proteccion durante 1 s.","P / ESC: pausar. Cambiar ventana pausa.","ENTER / ESC: volver al menu."};
+            String[] lineas={"WASD o flechas: caminar por los pasillos.","E: recoger o entregar. Q: dejar en suelo.","Entrega en el estante de su categoria.","Si hay orden: mira SIGUE en la lista.","Un producto en mano. +100 por entrega.","Choque: -5 s; proteccion durante 1 s.","P / ESC: pausar. Cambiar ventana pausa.","ENTER / ESC: volver al menu."};
             for(int i=0;i<lineas.length;i++)texto(g,lineas[i],128,137+i*23,9,CREMA);
         } else {
             String titulo=juego.isCampanaFinalizada()?"CAMPANA COMPLETA":e==Juego.Estado.PAUSA?"TURNO EN PAUSA":e==Juego.Estado.VICTORIA?"TODO EN SU LUGAR":"SE ACABO EL TURNO";

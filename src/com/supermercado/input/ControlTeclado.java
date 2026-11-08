@@ -14,7 +14,7 @@ public final class ControlTeclado {
     public void instalar(JComponent panel) {
         int[] teclas = {KeyEvent.VK_W, KeyEvent.VK_A, KeyEvent.VK_S, KeyEvent.VK_D,
             KeyEvent.VK_UP, KeyEvent.VK_LEFT, KeyEvent.VK_DOWN, KeyEvent.VK_RIGHT,
-            KeyEvent.VK_E, KeyEvent.VK_P, KeyEvent.VK_ESCAPE, KeyEvent.VK_ENTER, KeyEvent.VK_R};
+            KeyEvent.VK_E, KeyEvent.VK_Q, KeyEvent.VK_P, KeyEvent.VK_ESCAPE, KeyEvent.VK_ENTER, KeyEvent.VK_R};
         for (int tecla : teclas) {
             registrar(panel, tecla, false);
             registrar(panel, tecla, true);

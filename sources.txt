@@ -6,6 +6,9 @@ src/com/supermercado/entities/movimiento/PatrullaConPausas.java
 src/com/supermercado/entities/Jugador.java
 src/com/supermercado/entities/Personaje.java
 src/com/supermercado/game/Juego.java
+src/com/supermercado/game/objetivos/ReglaEntregas.java
+src/com/supermercado/game/objetivos/EntregasLibres.java
+src/com/supermercado/game/objetivos/EntregasEnOrden.java
 src/com/supermercado/input/ControlTeclado.java
 src/com/supermercado/levels/CatalogoNiveles.java
 src/com/supermercado/levels/ConfiguracionNivel.java

@@ -33,3 +33,30 @@ Pruebas: cuatro direcciones, independencia entre clientes, ciclo de marcha/desca
 colisiones y reconstruccion de entidades. Ejecutar probar.bat o bash probar.sh.
 
 La prueba recorre pasos del modelo; no sustituye el control manual con teclado.
+
+## U2 Entregas libres y secuencia por categorias
+
+La base de Joaquin ya contenia entregas en orden por identidad de producto y bloqueaba la
+recogida fuera de turno. Se conserva el Builder y su bandera entregasEnOrden, pero se completa
+el comportamiento acordado: se puede recoger cualquiera; la entrega fuera de orden conserva el
+producto y no suma ni avanza. Nivel delega en ReglaEntregas: EntregasLibres o EntregasEnOrden.
+
+En modo ordenado las categorias de la lista inicial forman la secuencia. Ejemplo: Manzana,
+Leche, Platano significa FRUTAS -> LACTEOS -> FRUTAS. Se puede entregar el Platano primero
+porque pertenece a la primera categoria. La regla cuenta entregados, consulta la categoria de
+esa posicion en la lista y busca un pendiente de esa categoria. No mantiene otro contador.
+getSiguienteProducto permite a la HUD mostrar SIGUE FRUTAS, LACTEOS, etc. No obliga a un nombre
+concreto dentro de la misma categoria. Cada entrega sigue pasando por Jugador y Estante.
+
+Q deja el producto en la posicion libre del jugador y vacia su mano. Es la salida necesaria
+para continuar tras recoger una categoria fuera de turno. Producto.soltar solo funciona si esta
+recogido y no entregado; sus coordenadas pasan a ser modificables mediante esa operacion.
+La configuracion original no cambia: reintentar crea productos nuevos en sus posiciones iniciales.
+ControlTeclado registra Q; GamePanel la consume una sola vez por pulsacion; Juego la ignora
+si no esta jugando. Si E y Q coinciden en un fotograma se prioriza Q.
+
+Ejemplo de prueba manual con un nivel configurado con entregasEnOrden(true): recoger Leche
+cuando SIGUE indica FRUTAS, ir a LACTEOS y pulsar E. Se rechaza conservando el producto. Pulsar
+Q, buscar una fruta, entregarla y seguir la categoria indicada. La partida no queda bloqueada.
+Las pruebas automaticas cubren ese rechazo, Q real en los Key Bindings, categorias repetidas,
+intercambio de dos frutas, puntos duplicados, modo libre, pausa y reintento.

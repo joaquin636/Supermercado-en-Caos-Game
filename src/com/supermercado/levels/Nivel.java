@@ -1,6 +1,7 @@
 package com.supermercado.levels;
 
 import com.supermercado.entities.*;
+import com.supermercado.game.objetivos.*;
 import com.supermercado.obstacles.*;
 import com.supermercado.products.Producto;
 import java.awt.geom.Rectangle2D;
@@ -13,6 +14,7 @@ public final class Nivel {
     public static final int ANCHO = 960;
     public static final int ALTO = 540;
     private final ConfiguracionNivel configuracion;
+    private final ReglaEntregas reglaEntregas;
     private final int numero;
     private final double tiempoLimite;
     private Jugador jugador;
@@ -24,6 +26,7 @@ public final class Nivel {
 
     public Nivel(ConfiguracionNivel configuracion) {
         this.configuracion = java.util.Objects.requireNonNull(configuracion);
+        reglaEntregas = configuracion.isEntregasEnOrden() ? new EntregasEnOrden() : new EntregasLibres();
         numero = configuracion.getNumero(); tiempoLimite = configuracion.getTiempo(); cargar();
     }
 
@@ -49,14 +52,14 @@ public final class Nivel {
     public ConfiguracionNivel getConfiguracion() { return configuracion; }
     public int getObjetivoEntregas() { return configuracion.getObjetivoEntregas(); }
     public boolean permiteEntrega(Producto producto) {
-        if (!productos.contains(producto) || producto.isEntregado()) return false;
-        if (!configuracion.isEntregasEnOrden()) return true;
-        for (Producto p : productos) if (!p.isEntregado()) return p == producto;
-        return false;
+        return !estaCompletado() && reglaEntregas.permite(producto, productos);
+    }
+    public Producto getSiguienteProducto() {
+        return estaCompletado() ? null : reglaEntregas.siguiente(productos);
     }
     public String getObjetivo() {
         return "Entrega " + getObjetivoEntregas() + " productos"
-                + (configuracion.isEntregasEnOrden() ? " en el orden de la lista." : " en sus estantes.");
+                + (configuracion.isEntregasEnOrden() ? " siguiendo las categorias de la lista." : " en sus estantes.");
     }
 
     public void actualizarPersonajes() {
