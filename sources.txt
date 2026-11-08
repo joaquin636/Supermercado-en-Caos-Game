@@ -1,5 +1,8 @@
 src/com/supermercado/Main.java
 src/com/supermercado/entities/Cliente.java
+src/com/supermercado/entities/movimiento/MovimientoCliente.java
+src/com/supermercado/entities/movimiento/PatrullaRebote.java
+src/com/supermercado/entities/movimiento/PatrullaConPausas.java
 src/com/supermercado/entities/Jugador.java
 src/com/supermercado/entities/Personaje.java
 src/com/supermercado/game/Juego.java

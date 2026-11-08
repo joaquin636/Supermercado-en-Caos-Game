@@ -31,6 +31,7 @@ public final class PruebasJuego {
         System.setProperty("java.awt.headless", "true");
         movimiento(); entregas(); estados(); recorridoCompleto();
         PruebasCampana.ejecutar();
+        PruebasJuan.ejecutar();
         SwingUtilities.invokeAndWait(() -> {
             try { menu(); teclado(); renderizar(args.length == 0 ? "build/capturas-pruebas" : args[0]); }
             catch (Exception e) { throw new RuntimeException(e); }
