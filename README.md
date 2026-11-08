@@ -2,7 +2,7 @@
 
 **Supermercado en Caos** es un videojuego cenital 2D desarrollado en Java (versión 17+, Swing / Java2D) sin dependencias ni bibliotecas externas. Proyecto desarrollado para el curso de Programación Orientada a Objetos (POO) de la Universidad Peruana Cayetano Heredia.
 
-El nivel 1 conserva sus seis entregas y dispone de 180 segundos (3 minutos). El nivel 2, **Pasillo concurrido**, tiene seis entregas libres, 165 segundos y clientes con dos comportamientos (Strategy): patrulla continua y patrulla con pausas. La campaña conserva puntos y permite reintentar. Los niveles 3–6 y la integracion de State y Observer siguen pendientes del equipo. Los cambios U1, U2 y U3 se explican en [docs/GUIA_JUAN.md](docs/GUIA_JUAN.md).
+El nivel 1 conserva sus seis entregas y dispone de 180 segundos (3 minutos). El nivel 2, **Pasillo concurrido**, tiene seis entregas libres, 135 segundos y cuatro clientes con dos comportamientos (Strategy): patrulla continua y patrulla con pausas. Incluye patrullas horizontales y verticales, y los estantes estan distribuidos entre la parte superior, derecha e inferior del mapa. La campaña conserva puntos y permite reintentar. Los niveles 3–6 y la integracion de State y Observer siguen pendientes del equipo. Los cambios U1, U2 y U3 se explican en [docs/GUIA_JUAN.md](docs/GUIA_JUAN.md).
 
 ![Partida](docs/capturas/02_partida.png)
 
@@ -75,7 +75,7 @@ El juego cuenta con 6 productos repartidos en 3 categorías bien definidas:
 * **Gráficos Originales:** Estilo pixel art original dibujado mediante Java2D (baldosas, mobiliario, productos y personajes) con una paleta limitada y coherente.
 * **Efectos Visuales:** Animación de pasos, orientación vertical, flotación de productos e indicadores de parpadeo para la inmunidad.
 * **Atlas de Texturas:** El archivo `atlas PNG` ubicado en la carpeta `assets` documenta las formas originales. Sin embargo, el juego drena y dibuja directamente desde código, por lo que no requiere archivos externos durante la ejecución.
-* **Alcance:** Sin audio. Nivel 1 original y nivel 2 Pasillo concurrido. No hay configuraciones de producto para niveles 3–6. El tiempo de 165 segundos es un valor inicial que el equipo debe ajustar jugando.
+* **Alcance:** Sin audio. Nivel 1 original y nivel 2 Pasillo concurrido. No hay configuraciones de producto para niveles 3–6. El tiempo de 135 segundos es un valor inicial que el equipo debe ajustar jugando. El texto de menus, HUD y etiquetas se dibuja a resolucion de ventana con suavizado; solo el arte del mundo se escala como pixel art.
 
 ---
 
@@ -106,3 +106,14 @@ Tambien se puede ejecutar esa clase desde IntelliJ con el argumento `--demo-orde
 Abre una configuracion de prueba de tres productos con secuencia FRUTAS, LACTEOS, FRUTAS.
 Recoger Leche primero permite probar el rechazo en LACTEOS y la recuperacion con Q.
 Es una demostracion de U2, no un tercer nivel de campaña; no se incluye en el JAR de produccion.
+
+## Probar directamente el nivel 2
+
+Despues de compilar las pruebas se puede ejecutar:
+
+```text
+java -cp build/classes com.supermercado.PruebasJuan --demo-nivel2
+```
+
+Abre Pasillo concurrido con los 600 puntos del primer nivel. Este lanzador solo es para probar;
+el juego normal sigue avanzando al nivel 2 despues de completar el primero y pulsar Enter.

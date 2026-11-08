@@ -73,7 +73,7 @@ public final class PruebasCampana {
         CatalogoNiveles c=CatalogoNiveles.predeterminado();
         Nivel uno=new Nivel(c.obtener(1)), otro=new Nivel(c.obtener(1)), dos=new Nivel(c.obtener(2));
         verificar(uno.getProductos().size()==6 && uno.getPersonajes().size()==4 && uno.getObstaculos().size()==5,"Conserva mapa original");
-        verificar(dos.getProductos().size()==6 && dos.getTiempoLimite()==165,"Nivel 2 con seis entregas y tiempo propio");
+        verificar(dos.getProductos().size()==6 && dos.getTiempoLimite()==135,"Nivel 2 con seis entregas y tiempo propio");
         verificar(uno.getJugador()!=otro.getJugador() && uno.getProductos().get(0)!=otro.getProductos().get(0)
             && uno.getPersonajes().get(1)!=otro.getPersonajes().get(1) && uno.getObstaculos().get(0)!=otro.getObstaculos().get(0),"Entidades independientes entre cargas");
         Producto anterior=uno.getProductos().get(0); anterior.marcarRecogido(); uno.cargar();
@@ -165,12 +165,12 @@ public final class PruebasCampana {
         panel.avanzarFotograma(.1); cerca(j.getTiempoRestante(),179.9,"Panel actualiza modelo a pasos fijos");
         panel.avanzarFotograma(.5); cerca(j.getTiempoRestante(),179.4,"Fotograma lento no pierde tiempo real");
         completar(j);pulsar(panel,KeyEvent.VK_ENTER);
-        verificar(j.getNivelActual()==2 && j.getPuntuacion()==600 && panel.getTextoTiempo().equals("TIEMPO 02:45"),"Enter avanza y HUD sincroniza tiempo y puntaje");
+        verificar(j.getNivelActual()==2 && j.getPuntuacion()==600 && panel.getTextoTiempo().equals("TIEMPO 02:15"),"Enter avanza y HUD sincroniza tiempo y puntaje");
         captura(panel,"08_nivel2.png");
         entregar(j,0);agotar(j);pulsar(panel,KeyEvent.VK_ENTER);
-        verificar(j.getNivelActual()==2 && j.getPuntuacion()==600 && j.getTiempoRestante()==165,"Enter reintenta sin perder progreso previo");
+        verificar(j.getNivelActual()==2 && j.getPuntuacion()==600 && j.getTiempoRestante()==135,"Enter reintenta sin perder progreso previo");
         captura(panel,"09_reintento.png");
-        panel.avanzarFotograma(.5); cerca(j.getTiempoRestante(),164.5,"Fotograma lento tras reintento conserva tiempo real");
+        panel.avanzarFotograma(.5); cerca(j.getTiempoRestante(),134.5,"Fotograma lento tras reintento conserva tiempo real");
         completar(j);pulsar(panel,KeyEvent.VK_ENTER);verificar(j.getNivelActual()==2,"UI conserva victoria cuando falta nivel");
         captura(panel,"10_pendiente.png");pulsar(panel,KeyEvent.VK_R);
         verificar(j.getNivelActual()==1 && j.getPuntuacion()==0,"R inicia nueva campana desde victoria");

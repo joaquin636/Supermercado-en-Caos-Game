@@ -25,11 +25,14 @@ public final class PruebasJuan {
         if (args.length == 1 && args[0].equals("--demo-orden")) {
             // Configuracion de demostracion, no agrega un nivel a la campana.
             SwingUtilities.invokeLater(() -> new GameWindow(juegoObjetivo(true)));
+        } else if (args.length == 1 && args[0].equals("--demo-nivel2")) {
+            // Acceso de verificacion: prepara la victoria del nivel 1 sin cambiar la campana.
+            SwingUtilities.invokeLater(() -> new GameWindow(entrarNivelDos()));
         } else if (args.length == 0) {
             System.setProperty("java.awt.headless", "true");
             ejecutar();
         } else {
-            throw new IllegalArgumentException("Uso: PruebasJuan [--demo-orden]");
+            throw new IllegalArgumentException("Uso: PruebasJuan [--demo-orden | --demo-nivel2]");
         }
     }
 
@@ -229,10 +232,16 @@ public final class PruebasJuan {
                 if (cliente.getMovimiento() instanceof PatrullaRebote) continuos++;
             }
         }
-        verificar(continuos == 2 && conPausas == 1, "Nivel 2 configura las dos estrategias");
+        verificar(continuos == 3 && conPausas == 1, "Nivel 2 configura cuatro clientes y las dos estrategias");
+        Cliente sube = (Cliente) nivel.getPersonajes().get(3);
+        Cliente baja = (Cliente) nivel.getPersonajes().get(4);
+        verificar(sube.getDireccion() == 3 && baja.getDireccion() == 1, "Hay patrullas verticales en ambos sentidos");
         capturar(j, "juan-nivel2-inicio.png");
+        capturar(j, "juan-nivel2-800.png", 800, 500);
+        double ySube = sube.getY(), yBaja = baja.getY();
         for (int i = 0; i < 121; i++) j.actualizar();
         verificar(((Cliente) nivel.getPersonajes().get(2)).estaDescansando(), "Cliente con pausas descansa en partida real");
+        verificar(sube.getY() < ySube && baja.getY() > yBaja, "Clientes avanzan realmente arriba y abajo");
         capturar(j, "juan-nivel2-cliente-descansando.png");
         for (Producto p : nivel.getProductos()) {
             caminar(j, p.getBounds()); j.interactuar();
@@ -262,7 +271,7 @@ public final class PruebasJuan {
         for (int i = 0; i < 10000 && derrota.getEstado() == Juego.Estado.JUGANDO; i++) derrota.actualizar();
         verificar(derrota.getEstado() == Juego.Estado.DERROTA, "Nivel 2 se puede perder por reloj");
         verificar(derrota.reintentarNivel() && derrota.getPuntuacion() == 600, "Reintenta nivel 2 conservando solo puntos previos");
-        verificar(derrota.getNivel().getEntregados() == 0 && derrota.getTiempoRestante() == 165, "Reintento restaura objetos y tiempo de nivel 2");
+        verificar(derrota.getNivel().getEntregados() == 0 && derrota.getTiempoRestante() == 135, "Reintento restaura objetos y tiempo de nivel 2");
         Cliente cliente = (Cliente) derrota.getNivel().getPersonajes().get(2);
         cliente.update();
         verificar(cliente.getDesplazamientoX() < 0, "Reintento restaura fase inicial de cliente con pausas");
@@ -314,10 +323,14 @@ public final class PruebasJuan {
     }
 
     private static void capturar(Juego juego, String nombre) throws Exception {
+        capturar(juego, nombre, 1280, 800);
+    }
+
+    private static void capturar(Juego juego, String nombre, int ancho, int alto) throws Exception {
         SwingUtilities.invokeAndWait(() -> {
             try {
-                GamePanel panel = new GamePanel(juego, false); panel.setSize(1280, 800);
-                BufferedImage imagen = new BufferedImage(1280, 800, BufferedImage.TYPE_INT_RGB);
+                GamePanel panel = new GamePanel(juego, false); panel.setSize(ancho, alto);
+                BufferedImage imagen = new BufferedImage(ancho, alto, BufferedImage.TYPE_INT_RGB);
                 java.awt.Graphics2D g = imagen.createGraphics(); panel.paint(g); g.dispose();
                 Path destino = Path.of("build/capturas-pruebas", nombre);
                 Files.createDirectories(destino.getParent());

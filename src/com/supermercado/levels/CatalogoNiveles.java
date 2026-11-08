@@ -34,16 +34,16 @@ public final class CatalogoNiveles {
             .construir();
         // U3: tiempo inicial de balance. Mismo objetivo, rutas distintas y dos estrategias reales.
         ConfiguracionNivel dos = ConfiguracionNivel.crear(2, "Pasillo concurrido")
-            .tiempo(165).jugador(48, 42)
-            .estante(Producto.FRUTAS, 90, 60).estante(Producto.LACTEOS, 390, 60)
-            .estante(Producto.LIMPIEZA, 690, 60)
-            .caja(280, 240, 90, 100).caja(580, 330, 100, 70)
-            .cliente(240, 190, 0)
-            .cliente(() -> new Cliente(480, 300, 2, new PatrullaConPausas(2, 1)))
-            .cliente(830, 450, 2)
-            .producto("Manzana", Producto.FRUTAS, 100, 230).producto("Platano", Producto.FRUTAS, 760, 440)
-            .producto("Leche", Producto.LACTEOS, 450, 250).producto("Yogur", Producto.LACTEOS, 140, 450)
-            .producto("Jabon", Producto.LIMPIEZA, 800, 230).producto("Detergente", Producto.LIMPIEZA, 470, 430)
+            .tiempo(135).jugador(48, 42)
+            .estante(Producto.FRUTAS, 80, 60).estante(Producto.LACTEOS, 690, 230)
+            .estante(Producto.LIMPIEZA, 100, 420)
+            .caja(390, 100, 80, 160).caja(390, 340, 80, 140).caja(670, 70, 110, 70)
+            .cliente(170, 300, 0)
+            .cliente(() -> new Cliente(540, 380, 2, new PatrullaConPausas(2, 1)))
+            .cliente(580, 470, 3).cliente(320, 170, 1)
+            .producto("Manzana", Producto.FRUTAS, 100, 220).producto("Platano", Producto.FRUTAS, 820, 70)
+            .producto("Leche", Producto.LACTEOS, 790, 410).producto("Yogur", Producto.LACTEOS, 250, 330)
+            .producto("Jabon", Producto.LIMPIEZA, 550, 110).producto("Detergente", Producto.LIMPIEZA, 550, 450)
             .construir();
         return new CatalogoNiveles(List.of(uno, dos));
     }

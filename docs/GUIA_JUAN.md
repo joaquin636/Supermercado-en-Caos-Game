@@ -64,8 +64,10 @@ intercambio de dos frutas, puntos duplicados, modo libre, pausa y reintento.
 ## U3 Pasillo concurrido
 
 CatalogoNiveles mantiene el nivel 1 y sustituye la demo de dos productos por seis entregas
-libres en el nivel 2. Tiempo inicial: 165 segundos. Hay dos clientes continuos y uno que
-camina dos segundos y descansa uno. Estantes y cajas cambian de posicion para exigir otras rutas.
+libres en el nivel 2. Tiempo inicial: 135 segundos. Hay cuatro clientes: tres continuos y uno que
+camina dos segundos y descansa uno. Dos recorren pasillos horizontales y dos verticales;
+uno de los verticales comienza subiendo y el otro bajando. Los estantes se distribuyen arriba,
+a la derecha y abajo, y las cajas centrales obligan a cruzar por accesos distintos.
 La fabrica del cliente con pausas usa el constructor nuevo; los otros usan el original.
 La HUD muestra el nombre del nivel y una z sobre un cliente detenido por su estrategia.
 
@@ -91,6 +93,8 @@ Las pruebas unitarias de entrega si colocan al jugador junto a objetos para aisl
    Usa la misma GameWindow mediante su constructor que recibe un Juego. Son tres productos
    de prueba: FRUTAS -> LACTEOS -> FRUTAS, no otro nivel del producto.
 5. El JAR dist/SupermercadoEnCaos.jar se reconstruye para incluir las clases nuevas de esta rama.
+6. Para probar directamente el segundo mapa: java -cp build/classes com.supermercado.PruebasJuan --demo-nivel2.
+   Este lanzador de pruebas prepara el paso del nivel 1 al 2; no altera la progresion del juego normal.
 
 ## Mapa de archivos para estudiar el codigo
 
@@ -133,8 +137,8 @@ de los otros integrantes y la exposicion individual. No hay prueba con teclado f
 ## Resultado de verificacion
 
 Compilacion con JDK 27, --release 17, UTF-8 y -Xlint:all: correcta y sin advertencias.
-La suite completa pasa 845 comprobaciones generales, 201 de campaña y 2430 de Juan (3476 en total).
-El recorrido del nivel 2 completa seis entregas con 137.7 segundos restantes; incluye espera inicial
+La suite completa pasa 845 comprobaciones generales, 201 de campaña y 2505 de Juan (3551 en total).
+El recorrido del nivel 2 completa seis entregas con 101.9 segundos restantes; incluye espera inicial
 para comprobar el descanso de un cliente. Es una ruta automatizada, no una partida manual de un alumno.
 Se verifico tambien con el JAR como primera entrada del classpath y pruebas fuera del JAR.
 El JAR y la demo ordenada iniciaron como procesos de escritorio sin errores de arranque.
@@ -142,3 +146,17 @@ Las capturas son renderizados del panel Swing, revisados visualmente; no captura
 El balance humano, las contribuciones de los compañeros y la defensa de los conceptos siguen siendo
 trabajo real del equipo. Los tres commits de esta rama contienen asistencia de IA; estudiar y revisar
 los cambios es necesario para explicarlos y atribuir el trabajo con honestidad.
+
+## Correccion de legibilidad y dificultad tras probar
+
+La version anterior dibujaba letras pequenas dentro de la imagen de 640x400 y las ampliaba;
+las etiquetas del mapa ademas pasaban por una escala de 0.5. Esto degradaba las formas.
+Ahora paintComponent dibuja solo los sprites y el suelo en esa imagen, la amplia por vecino
+mas cercano y dibuja despues etiquetasMapa, HUD y pantallas directamente sobre Graphics2D
+de la ventana. Se utiliza SansSerif con suavizado, tamanos mayores y ajuste de mensajes por
+FontMetrics. Los controles, reglas y coordenadas del modelo son los mismos.
+
+El segundo mapa usa otro tono de suelo para reconocer la transicion. El titulo del nivel es
+grande y la victoria del primero indica ENTER para ir al nivel 2. Se revisaron capturas a
+1280x800 y 800x500. Las patrullas arriba/abajo se comprueban por su desplazamiento real;
+el nuevo recorrido tambien sigue verificando accesibilidad, reloj, victoria y reintento.
