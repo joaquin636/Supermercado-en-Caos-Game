@@ -149,14 +149,14 @@ los cambios es necesario para explicarlos y atribuir el trabajo con honestidad.
 
 ## Correccion de legibilidad y dificultad tras probar
 
-La version anterior dibujaba letras pequenas dentro de la imagen de 640x400 y las ampliaba;
-las etiquetas del mapa ademas pasaban por una escala de 0.5. Esto degradaba las formas.
-Ahora paintComponent dibuja solo los sprites y el suelo en esa imagen, la amplia por vecino
-mas cercano y dibuja despues etiquetasMapa, HUD y pantallas directamente sobre Graphics2D
-de la ventana. Se utiliza SansSerif con suavizado, tamanos mayores y ajuste de mensajes por
-FontMetrics. Los controles, reglas y coordenadas del modelo son los mismos.
+El mapa del segundo nivel conserva su distribución y cuatro clientes. Dos patrullan en
+vertical, con una salida hacia arriba y otra hacia abajo. El tiempo inicial es de 135 segundos.
 
-El segundo mapa usa otro tono de suelo para reconocer la transicion. El titulo del nivel es
-grande y la victoria del primero indica ENTER para ir al nivel 2. Se revisaron capturas a
-1280x800 y 800x500. Las patrullas arriba/abajo se comprueban por su desplazamiento real;
-el nuevo recorrido tambien sigue verificando accesibilidad, reloj, victoria y reintento.
+La presentación recupera la paleta crema y verde de la tienda original. GamePanel dibuja
+el mundo, los rótulos y el HUD sobre la misma imagen de 640 × 400 y la amplía con vecino
+más cercano. Los textos monoespaciados en negrita se dibujan sin suavizado. Los mensajes se
+parten por palabras según su ancho en píxeles. Las bandas de los estantes indican su categoría.
+La marca dorada identifica al repositor y la etiqueta E muestra el nombre del producto cercano.
+
+Se revisaron capturas de ambos niveles y del nivel 2 en una ventana de 800 × 500. La prueba
+de campaña incluye el paso de nivel con Enter, las patrullas verticales, la victoria y el reintento.

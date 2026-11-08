@@ -110,9 +110,18 @@ public final class GamePanel extends JPanel {
 
     private static final Color OSCURO = new Color(28,39,43), CREMA = new Color(244,224,174), ORO = new Color(229,169,74);
     private void rect(Graphics2D g, int x,int y,int w,int h,int rgb) {g.setColor(new Color(rgb));g.fillRect(x,y,w,h);}
-    private void texto(Graphics2D g,String t,int x,int y,int size,Color c) {g.setColor(c);g.setFont(new Font(Font.SANS_SERIF,Font.BOLD,size));g.drawString(t,x,y);}
+    // Monoespaciada de trazo sencillo para las etiquetas; titulos con la fuente original.
+    private static final Font CUERPO = fuenteCuerpo();
+    private static Font fuenteCuerpo() {
+        Font consola = new Font("Consolas", Font.BOLD, 12);
+        return "Consolas".equalsIgnoreCase(consola.getFamily()) ? consola : new Font(Font.MONOSPACED, Font.BOLD, 12);
+    }
+    private Font fuente(int size) {
+        return size >= 14 ? new Font(Font.MONOSPACED, Font.BOLD, size) : CUERPO.deriveFont((float) size);
+    }
+    private void texto(Graphics2D g,String t,int x,int y,int size,Color c) {g.setColor(c);g.setFont(fuente(size));g.drawString(t,x,y);}
     private void centrado(Graphics2D g, String t, int y, int size, Color c) {
-        g.setFont(new Font(Font.SANS_SERIF, Font.BOLD, size));
+        g.setFont(fuente(size));
         texto(g, t, (640 - g.getFontMetrics().stringWidth(t)) / 2, y, size, c);
     }
     private void marco(Graphics2D g,int x,int y,int w,int h) {
@@ -120,10 +129,14 @@ public final class GamePanel extends JPanel {
     }
     @Override protected void paintComponent(Graphics graphics) {
         super.paintComponent(graphics);
-        // Solo el arte se amplifica por vecino cercano. El texto se dibuja despues, a resolucion de ventana.
+        // Dibujar el fotograma completo en la cuadricula del pixel art.
         Graphics2D g=escena.createGraphics();
+        g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_OFF);
         rect(g,0,0,640,400,0x17282c);
         mundo(g);
+        etiquetasMapa(g);
+        hud(g);
+        if (juego.getEstado() != Juego.Estado.JUGANDO) pantalla(g);
         g.dispose();
         Graphics2D out=(Graphics2D)graphics.create();
         out.setColor(OSCURO);out.fillRect(0,0,getWidth(),getHeight());
@@ -131,29 +144,21 @@ public final class GamePanel extends JPanel {
         double escala=Math.min(getWidth()/640.0,getHeight()/400.0);
         int w=(int)(640*escala),h=(int)(400*escala);
         out.drawImage(escena,(getWidth()-w)/2,(getHeight()-h)/2,w,h,null);
-        out.translate((getWidth()-w)/2, (getHeight()-h)/2);
-        out.scale(w / 640.0, h / 400.0);
-        out.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-        out.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON);
-        etiquetasMapa(out);
-        hud(out);
-        if(juego.getEstado()!=Juego.Estado.JUGANDO) pantalla(out);
         out.dispose();
     }
     private void mundo(Graphics2D g) {
         // Los limites visuales del suelo coinciden con los del modelo (960 x 540).
         rect(g,12,52,488,280,0x101f26);
-        boolean segundo = juego.getNivelActual() == 2;
-        rect(g,16,56,480,270,segundo ? 0x859fa7 : 0xa5ad91);
+        rect(g,16,56,480,270,0xa5ad91);
         for(int y=0;y<18;y++)for(int x=0;x<32;x++) {
             int px=16+x*15,py=56+y*15;
-            rect(g,px,py,14,14,((x+y)%2==0)?(segundo?0xb7cbd0:0xc9c7a4):(segundo?0xa7bfc6:0xbebf9c));
-            rect(g,px+1,py+1,12,1,segundo?0xcfe0e0:0xd4d1b0);
+            rect(g,px,py,14,14,((x+y)%2==0)?0xc9c7a4:0xbebf9c);
+            rect(g,px+1,py+1,12,1,0xd4d1b0);
             if((x*13+y*7)%41==0)rect(g,px+9,py+10,2,1,0xa7ac8c);
         }
         // Fachada y rotulos quedan fuera de la zona transitable.
         rect(g,12,40,488,12,0x5c7463);rect(g,16,42,480,3,0x91aa7e);
-        Graphics2D m=(Graphics2D)g.create();m.translate(16,56);m.scale(.5,.5);
+        Graphics2D m=(Graphics2D)g.create();m.translate(16,56);m.scale(.5,.5);m.clipRect(0,0,Nivel.ANCHO,Nivel.ALTO);
         for(Obstaculo o:juego.getNivel().getObstaculos()) estante(m,o);
         for(Producto p:juego.getNivel().getProductos())if(p.estaDisponible()) {
             int x=(int)p.getX(),y=(int)p.getY();
@@ -167,19 +172,26 @@ public final class GamePanel extends JPanel {
         rect(g,18,313,70,13,0x45685b);
     }
     private void etiquetasMapa(Graphics2D g) {
-        texto(g,"MERCADO LA ESQUINA",23,50,10,Color.WHITE);
-        texto(g,"ENTRADA",24,323,10,Color.WHITE);
+        texto(g,"MERCADO LA ESQUINA",23,50,10,CREMA);
+        String turno = "N" + juego.getNivelActual() + " / " + juego.getNivel().getConfiguracion().getIdentificacion();
+        texto(g,turno,215,50,10,CREMA);
+        texto(g,"ENTRADA",24,323,10,CREMA);
         for (Obstaculo obstaculo : juego.getNivel().getObstaculos()) {
             if (obstaculo instanceof Estante e) {
                 int x = 16 + (int)e.getX()/2, y = 56 + ((int)e.getY()+e.getAlto())/2;
-                g.setColor(OSCURO); g.fillRect(x+1,y-14,e.getAncho()/2-2,14);
-                texto(g,e.getCategoria()+" "+e.getRecibidos().size()+"/"+cantidadCategoria(e.getCategoria()),x+4,y-3,10,Color.WHITE);
+                rect(g,x+1,y-12,e.getAncho()/2-2,11,color(e.getCategoria()));
+                texto(g,e.getCategoria()+" "+e.getRecibidos().size()+"/"+cantidadCategoria(e.getCategoria()),x+4,y-3,10,OSCURO);
             }
         }
         Producto cercano = juego.getNivel().productoCercano();
         if (cercano != null && juego.getNivel().getJugador().getProductoEnMano() == null) {
             int x=16+(int)cercano.getX()/2, y=56+(int)cercano.getY()/2;
-            g.setColor(OSCURO);g.fillRect(x-2,y-15,18,13);texto(g,"E",x+3,y-4,11,Color.WHITE);
+            String aviso = "E " + cercano.getNombre();
+            g.setFont(fuente(11));
+            int ancho = g.getFontMetrics().stringWidth(aviso) + 8;
+            x = Math.max(16, Math.min(x - 2, 496 - ancho));
+            y = Math.max(70, y);
+            g.setColor(OSCURO); g.fillRect(x,y-14,ancho,13); texto(g,aviso,x+4,y-4,11,CREMA);
         }
         for (Personaje p : juego.getNivel().getPersonajes()) {
             if (p instanceof Cliente cliente && juego.getEstado()==Juego.Estado.JUGANDO && cliente.estaDescansando()) {
@@ -210,11 +222,20 @@ public final class GamePanel extends JPanel {
             rect(g,x,y,w,h,0x77553e);rect(g,x+3,y+3,w-6,h-10,0xb58b59);
             rect(g,x+5,y+5,w-10,3,0xd2ad73);rect(g,x+w/2-4,y+2,8,h-6,0xd8bc80);
             rect(g,x+12,y+23,21,17,0xe9d5a0);
+            rect(g,x+20,y+27,4,10,0x77553e);rect(g,x+17,y+29,10,3,0x77553e);
             rect(g,x+2,y+h-9,w-4,7,0x966d47);
         }
     }
     private void producto(Graphics2D g,Producto p,int x,int y) {
-        if(Producto.FRUTAS.equals(p.getCategoria())) {
+        if (p.getNombre().equals("Platano")) {
+            rect(g,x+2,y+9,5,8,0xb88a41); rect(g,x+5,y+13,15,7,0xb88a41);
+            rect(g,x+5,y+11,12,6,0xe5a94a); rect(g,x+15,y+8,7,7,0xf4e0ae);
+            rect(g,x+20,y+4,3,6,0x77553e);
+        } else if (p.getNombre().equals("Yogur") || p.getNombre().equals("Jabon")) {
+            rect(g,x+2,y+10,21,12,0x394e49); rect(g,x+4,y+11,17,9,color(p.getCategoria()));
+            rect(g,x+7,y+13,10,3,0xf4e0ae);
+            if (p.getNombre().equals("Yogur")) rect(g,x+1,y+7,23,4,0xf4e0ae);
+        } else if(Producto.FRUTAS.equals(p.getCategoria())) {
             rect(g,x+6,y+5,15,18,0x943e3c);rect(g,x+3,y+8,21,11,0xc96049);
             rect(g,x+7,y+6,4,5,0xed9760);rect(g,x+12,y+1,3,6,0x594936);rect(g,x+15,y+1,7,3,0x63814d);
         } else {
@@ -226,13 +247,22 @@ public final class GamePanel extends JPanel {
         int x=(int)p.getX(),y=(int)p.getY();boolean j=p instanceof Jugador;
         rect(g,x+2,y+26,28,5,0x8d967c);
         if(j&&((Jugador)p).esInmune()&&((int)(animacion*12)%2==0))return;
+        if (j) {
+            rect(g,x+9,y-15,12,2,0x394e49);rect(g,x+11,y-13,8,2,0xe5a94a);rect(g,x+13,y-11,4,2,0xe5a94a);
+        }
         int paso=(Math.abs(p.getDesplazamientoX())+Math.abs(p.getDesplazamientoY())>.01)?((int)(animacion*9)%2)*3:0;
         rect(g,x+6,y+22,7,8-paso,0x283d42);rect(g,x+19,y+22,7,5+paso,0x283d42);
         rect(g,x+3,y+11,25,13,j?0x456d70:0xb4684f);
         rect(g,x+9,y+13,13,13,j?0xd8b66c:0x775c71);
+        if (j) {
+            // Marca del repositor en el delantal y ribete claro de la gorra.
+            rect(g,x+12,y+17,8,4,0xf4e0ae);
+            rect(g,x+18,y+18,2,2,0x456d70);
+        }
         rect(g,x+2,y+15,5,8,0xdfad7c);rect(g,x+26,y+15,4,8,0xdfad7c);
         rect(g,x+7,y-4,18,17,0x443d36);rect(g,x+8,y,16,12,0xe6b783);
         rect(g,x+6,y-5,20,6,j?0x527d67:0x644837);rect(g,x+5,y,23,3,j?0x7ca178:0x644837);
+        if (j) rect(g,x+8,y-5,16,2,0xe5a94a);
         boolean espalda=p.getDesplazamientoY()<0;
         if(espalda)rect(g,x+8,y+3,16,7,0x574738);
         else {rect(g,x+11,y+5,2,3,0x2e3938);rect(g,x+20,y+5,2,3,0x2e3938);}
@@ -247,13 +277,13 @@ public final class GamePanel extends JPanel {
     }
     private void hud(Graphics2D g) {
 
-        texto(g,"SUPERMERCADO EN CAOS",16,18,13,CREMA);
-        texto(g,"NIVEL "+juego.getNivelActual()+" - "+juego.getNivel().getConfiguracion().getIdentificacion(),16,34,12,ORO);
+        texto(g,"SUPERMERCADO",16,16,13,CREMA);
+        texto(g,"EN CAOS",16,32,15,ORO);
         int t=(int)Math.ceil(juego.getTiempoRestante());
-        texto(g,getTextoTiempo(),364,21,13,t<=30?new Color(255,139,106):Color.WHITE);
-        texto(g,"PUNTOS "+juego.getPuntuacion(),521,23,12,ORO);
+        texto(g,getTextoTiempo(),225,23,13,t<=30?new Color(255,139,106):CREMA);
+        texto(g,"PTS "+String.format("%03d",juego.getPuntuacion()),440,23,13,ORO);
         marco(g,508,40,120,292);
-        texto(g,"TU LISTA",520,63,14,ORO);texto(g,"Entregados "+juego.getNivel().getEntregados()+"/"+juego.getNivel().getObjetivoEntregas(),520,82,11,Color.WHITE);
+        texto(g,"TU LISTA",520,63,14,ORO);texto(g,"Listos "+juego.getNivel().getEntregados()+"/"+juego.getNivel().getObjetivoEntregas(),520,82,11,CREMA);
         Producto siguiente = juego.getNivel().getSiguienteProducto();
         texto(g,siguiente == null ? (juego.getNivel().estaCompletado()?"COMPLETADO":"ORDEN LIBRE") : "SIGUE " + siguiente.getCategoria(),520,99,10,ORO);
         java.util.List<Producto> lista=juego.getNivel().getProductos();
@@ -266,23 +296,23 @@ public final class GamePanel extends JPanel {
             Producto p=lista.get(i);int y=122+(i-inicio)*23;
 
             rect(g,520,y-8,7,7,p.isEntregado()?0x8ca654:0x596362);
-            texto(g,p.getNombre(),533,y,11,Color.WHITE);
+            texto(g,p.getNombre(),533,y,12,CREMA);
         }
         texto(g,"EN MANO",521,271,12,ORO);
         Producto p=juego.getNivel().getJugador().getProductoEnMano();
-        texto(g,p==null?"Sin producto":p.getNombre(),521,290,11,Color.WHITE);
+        texto(g,p==null?"Sin producto":p.getNombre(),521,290,11,CREMA);
         texto(g,p==null?"E para recoger":p.getCategoria(),521,309,10,CREMA);
         marco(g,12,334,616,60);
         String mensaje=juego.getMensaje();
-        // Ajustar por ancho real de la fuente; las letras se dibujan a resolucion nativa.
+        // Medir con la misma fuente utilizada para dibujar el mensaje.
         int linea=0;String actual="";
-        g.setFont(new Font(Font.SANS_SERIF,Font.BOLD,11));
+        g.setFont(fuente(12));
         for(String palabra:mensaje.split(" ")) {
-            if(g.getFontMetrics().stringWidth(actual+palabra)>590){texto(g,actual,24,352+linea*14,11,Color.WHITE);linea++;actual="";}
+            if(g.getFontMetrics().stringWidth(actual+palabra)>590){texto(g,actual,24,352+linea*14,12,CREMA);linea++;actual="";}
             actual+=palabra+" ";
         }
-        texto(g,actual,24,352+linea*14,11,Color.WHITE);
-        texto(g,"WASD / FLECHAS: mover     E: interactuar     Q: dejar     P / ESC: pausa",24,384,10,ORO);
+        texto(g,actual,24,352+linea*14,12,CREMA);
+        texto(g,"WASD / FLECHAS: mover     E: interactuar     Q: dejar     P / ESC: pausa",24,384,11,ORO);
     }
     private void pantalla(Graphics2D g) {
         g.setColor(new Color(14,25,29,190));g.fillRect(0,0,640,400);

@@ -75,7 +75,7 @@ El juego cuenta con 6 productos repartidos en 3 categorías bien definidas:
 * **Gráficos Originales:** Estilo pixel art original dibujado mediante Java2D (baldosas, mobiliario, productos y personajes) con una paleta limitada y coherente.
 * **Efectos Visuales:** Animación de pasos, orientación vertical, flotación de productos e indicadores de parpadeo para la inmunidad.
 * **Atlas de Texturas:** El archivo `atlas PNG` ubicado en la carpeta `assets` documenta las formas originales. Sin embargo, el juego drena y dibuja directamente desde código, por lo que no requiere archivos externos durante la ejecución.
-* **Alcance:** Sin audio. Nivel 1 original y nivel 2 Pasillo concurrido. No hay configuraciones de producto para niveles 3–6. El tiempo de 135 segundos es un valor inicial que el equipo debe ajustar jugando. El texto de menus, HUD y etiquetas se dibuja a resolucion de ventana con suavizado; solo el arte del mundo se escala como pixel art.
+* **Alcance:** Sin audio. Nivel 1 original y nivel 2 Pasillo concurrido. No hay configuraciones de producto para niveles 3–6. El tiempo de 135 segundos es un valor inicial que el equipo debe ajustar jugando. Las letras monoespaciadas, los paneles dorados, las bandas de cada estante y las baldosas cálidas se dibujan en una escena de 640 × 400. El escalado por vecino más cercano conserva los bordes de los píxeles.
 
 ---
 
