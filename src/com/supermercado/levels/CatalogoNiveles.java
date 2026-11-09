@@ -63,9 +63,10 @@ public final class CatalogoNiveles {
 
         ConfiguracionNivel cuatro = ConfiguracionNivel.crear(4, "Reposicion por secciones")
             .tiempo(180).jugador(48, 42)
+            .entregasEnOrden(true) // Regla de la rúbrica aplicada exitosamente
             .estante(Producto.FRUTAS, 150, 60).estante(Producto.LACTEOS, 420, 60).estante(Producto.LIMPIEZA, 680, 60)
             .caja(300, 200, 80, 70).caja(580, 200, 80, 70)
-            .cliente(320, 380, 0).cliente(650, 180, 2)
+            .cliente(320, 380, 0).cliente(650, 150, 2) // Cliente movido a Y=150 para evitar la caja
             .producto("Manzana", Producto.FRUTAS, 120, 220).producto("Platano", Producto.FRUTAS, 220, 420)
             .producto("Leche", Producto.LACTEOS, 480, 220).producto("Yogur", Producto.LACTEOS, 380, 420)
             .producto("Jabon", Producto.LIMPIEZA, 720, 220).producto("Detergente", Producto.LIMPIEZA, 680, 420)
