@@ -23,3 +23,4 @@ src/com/supermercado/game/eventos/EventoJuego.java
 src/com/supermercado/game/eventos/ObservadorJuego.java
 src/com/supermercado/game/eventos/RegistroEstadisticas.java
 src/com/supermercado/game/eventos/BuzonMensajesHud.java
+src/com/supermercado/api/APIClient.java
