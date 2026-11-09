@@ -32,6 +32,7 @@ public final class PruebasJuego {
         movimiento(); entregas(); estados(); recorridoCompleto();
         PruebasCampana.ejecutar();
         PruebasJuan.ejecutar();
+        PruebasAldayer.ejecutar();
         SwingUtilities.invokeAndWait(() -> {
             try { menu(); teclado(); renderizar(args.length == 0 ? "build/capturas-pruebas" : args[0]); }
             catch (Exception e) { throw new RuntimeException(e); }

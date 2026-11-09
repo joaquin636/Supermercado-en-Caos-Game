@@ -18,3 +18,8 @@ src/com/supermercado/obstacles/Obstaculo.java
 src/com/supermercado/products/Producto.java
 src/com/supermercado/ui/GamePanel.java
 src/com/supermercado/ui/GameWindow.java
+src/com/supermercado/game/eventos/TipoEvento.java
+src/com/supermercado/game/eventos/EventoJuego.java
+src/com/supermercado/game/eventos/ObservadorJuego.java
+src/com/supermercado/game/eventos/RegistroEstadisticas.java
+src/com/supermercado/game/eventos/BuzonMensajesHud.java
