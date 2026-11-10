@@ -9,6 +9,7 @@ import java.util.*;
 public final class CatalogoNiveles {
     public static final int ULTIMO_NIVEL = 6;
     private final Map<Integer, ConfiguracionNivel> niveles;
+    
     public CatalogoNiveles(Collection<ConfiguracionNivel> configuraciones) {
         Map<Integer, ConfiguracionNivel> mapa = new TreeMap<>();
         for (ConfiguracionNivel c : configuraciones)
@@ -16,12 +17,15 @@ public final class CatalogoNiveles {
         if (!mapa.containsKey(1)) throw new IllegalArgumentException("El catalogo necesita el nivel 1.");
         niveles = Collections.unmodifiableMap(mapa);
     }
+    
     public boolean contiene(int numero) { return niveles.containsKey(numero); }
+    
     public ConfiguracionNivel obtener(int numero) {
         ConfiguracionNivel c = niveles.get(numero);
         if (c == null) throw new IllegalArgumentException("Configuracion pendiente del nivel " + numero);
         return c;
     }
+    
     public static CatalogoNiveles predeterminado() {
         ConfiguracionNivel uno = ConfiguracionNivel.crear(1, "Turno de reposicion")
             .tiempo(180).jugador(48, 42)
@@ -32,7 +36,7 @@ public final class CatalogoNiveles {
             .producto("Leche", Producto.LACTEOS, 440, 270).producto("Yogur", Producto.LACTEOS, 140, 455)
             .producto("Jabon", Producto.LIMPIEZA, 780, 235).producto("Detergente", Producto.LIMPIEZA, 815, 405)
             .construir();
-        // U3: tiempo inicial de balance. Mismo objetivo, rutas distintas y dos estrategias reales.
+
         ConfiguracionNivel dos = ConfiguracionNivel.crear(2, "Pasillo concurrido")
             .tiempo(135).jugador(48, 42)
             .estante(Producto.FRUTAS, 80, 60).estante(Producto.LACTEOS, 690, 230)
@@ -45,6 +49,7 @@ public final class CatalogoNiveles {
             .producto("Leche", Producto.LACTEOS, 790, 410).producto("Yogur", Producto.LACTEOS, 250, 330)
             .producto("Jabon", Producto.LIMPIEZA, 550, 110).producto("Detergente", Producto.LIMPIEZA, 550, 450)
             .construir();
+
         return new CatalogoNiveles(List.of(uno, dos));
     }
 }

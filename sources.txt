@@ -18,3 +18,9 @@ src/com/supermercado/obstacles/Obstaculo.java
 src/com/supermercado/products/Producto.java
 src/com/supermercado/ui/GamePanel.java
 src/com/supermercado/ui/GameWindow.java
+src/com/supermercado/game/estados/EstadoJuego.java
+src/com/supermercado/game/estados/EstadoMenu.java
+src/com/supermercado/game/estados/EstadoJugando.java
+src/com/supermercado/game/estados/EstadoPausa.java
+src/com/supermercado/game/estados/EstadoResultado.java
+src/com/supermercado/game/estados/EstadoFinalCampana.java

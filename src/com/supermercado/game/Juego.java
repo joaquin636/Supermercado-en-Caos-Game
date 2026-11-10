@@ -4,48 +4,76 @@ import com.supermercado.entities.*;
 import com.supermercado.levels.*;
 import com.supermercado.obstacles.Estante;
 import com.supermercado.products.Producto;
+import com.supermercado.game.estados.*;
 
-/** Coordinador del UML. No depende de ventanas ni de eventos Swing. */
+/** Coordinador del modelo de juego adaptado al Patrón State con compatibilidad de pruebas. */
 public final class Juego {
-    // Enum provisional: NO se presenta como implementacion del patron State.
+    
+    // Enum de compatibilidad para GamePanel y las pruebas automatizadas existentes
     public enum Estado { MENU, JUGANDO, PAUSA, VICTORIA, DERROTA }
+
     private final CatalogoNiveles catalogo;
     private int puntuacion;
     private int puntuacionInicioNivel;
     private boolean campanaFinalizada;
     private double tiempoRestante;
     private Nivel nivel;
-    private Estado estado = Estado.MENU;
+    
+    // Estado activo mediante el Patrón State
+    private EstadoJuego estadoActual;
+    
+    // Bandera auxiliar para saber si la última pantalla de resultado fue victoria o derrota
+    private boolean ultimoResultadoVictoria;
+
     private String mensaje = "Organiza los seis productos antes de que termine el tiempo.";
     private double duracionMensaje;
 
     public Juego() { this(CatalogoNiveles.predeterminado()); }
+    
     public Juego(CatalogoNiveles catalogo) {
         this.catalogo = java.util.Objects.requireNonNull(catalogo);
-        nivel = new Nivel(catalogo.obtener(1)); tiempoRestante = nivel.getTiempoLimite();
+        nivel = new Nivel(catalogo.obtener(1)); 
+        tiempoRestante = nivel.getTiempoLimite();
+        // Arranca en el Menú principal
+        this.estadoActual = new EstadoMenu(this);
     }
 
-    private void cargarNivel(int numero) {
+    public void cambiarEstado(EstadoJuego nuevoEstado) {
+        this.estadoActual = nuevoEstado;
+    }
+
+    public EstadoJuego getEstadoActual() {
+        return estadoActual;
+    }
+
+    public void cargarNivel(int numero) {
         Nivel nuevo = new Nivel(catalogo.obtener(numero));
-        nivel = nuevo; puntuacionInicioNivel = puntuacion;
-        tiempoRestante = nivel.getTiempoLimite(); estado = Estado.JUGANDO;
+        nivel = nuevo; 
+        puntuacionInicioNivel = puntuacion;
+        tiempoRestante = nivel.getTiempoLimite(); 
         avisar(nivel.getObjetivo());
+        // Al cargar nivel, pasamos al estado de juego activo
+        cambiarEstado(new EstadoJugando(this));
     }
 
     /** Consume una victoria una sola vez; si falta la configuracion conserva el resultado. */
     public boolean avanzarNivel() {
-        if (estado != Estado.VICTORIA || campanaFinalizada) return false;
+        if (!(estadoActual instanceof EstadoResultado) || campanaFinalizada) return false;
         int siguiente = getNivelActual() + 1;
         if (!catalogo.contiene(siguiente)) {
-            avisar("Nivel " + siguiente + " pendiente de integracion. R: nueva campana."); return false;
+            avisar("Nivel " + siguiente + " pendiente de integracion. R: nueva campana."); 
+            return false;
         }
-        cargarNivel(siguiente); return true;
+        cargarNivel(siguiente); 
+        return true;
     }
 
     public boolean reintentarNivel() {
-        if (estado != Estado.DERROTA) return false;
+        if (!(estadoActual instanceof EstadoResultado)) return false;
         int numero = getNivelActual();
-        puntuacion = puntuacionInicioNivel; cargarNivel(numero); return true;
+        puntuacion = puntuacionInicioNivel; 
+        cargarNivel(numero); 
+        return true;
     }
 
     public int getNivelActual() { return nivel.getNumero(); }
@@ -55,15 +83,24 @@ public final class Juego {
         return !campanaFinalizada && catalogo.contiene(getNivelActual() + 1);
     }
 
-
     public void iniciarPartida() {
-        puntuacion = 0; campanaFinalizada = false; cargarNivel(1);
+        puntuacion = 0; 
+        campanaFinalizada = false; 
+        cargarNivel(1);
         avisar("Acercate a un producto y pulsa E para recogerlo.");
     }
 
-    /** Paso fijo de 1/60 s: la interfaz puede dibujar a otra frecuencia. */
+    /** Delegación al estado activo del Patrón State */
     public void actualizar() {
-        if (estado != Estado.JUGANDO) return;
+        estadoActual.actualizar();
+    }
+
+    public void manejarTeclado(int keyCode, boolean pressed) {
+        estadoActual.manejarTeclado(keyCode, pressed);
+    }
+
+    // --- Lógica interna de simulación (llamada por EstadoJugando) ---
+    public void actualizarSimulacionPartida() {
         nivel.actualizarPersonajes();
         duracionMensaje = Math.max(0, duracionMensaje - Personaje.PASO);
         Jugador jugador = nivel.getJugador();
@@ -74,11 +111,13 @@ public final class Juego {
             }
         }
         tiempoRestante = Math.max(0, tiempoRestante - Personaje.PASO);
-        if (tiempoRestante < 1e-9) { tiempoRestante = 0; terminarPartida(); }
+        if (tiempoRestante < 1e-9) { 
+            tiempoRestante = 0; 
+            terminarPartida(false); 
+        }
     }
 
     public void interactuar() {
-        if (estado != Estado.JUGANDO) return;
         Jugador j = nivel.getJugador();
         Producto enMano = j.getProductoEnMano();
         if (enMano == null) {
@@ -100,41 +139,91 @@ public final class Juego {
                 puntuacion += enMano.getPuntos();
                 avisar("Entrega correcta: +" + enMano.getPuntos() + " puntos.");
                 if (nivel.estaCompletado()) {
-                    estado = Estado.VICTORIA; j.setDireccion(0, 0);
+                    j.setDireccion(0, 0);
                     campanaFinalizada = getNivelActual() == CatalogoNiveles.ULTIMO_NIVEL;
+                    if (campanaFinalizada) {
+                        cambiarEstado(new EstadoFinalCampana(this));
+                    } else {
+                        ultimoResultadoVictoria = true;
+                        cambiarEstado(new EstadoResultado(this, true));
+                    }
                 }
-
             }
         }
     }
 
     public void alternarPausa() {
-        if (estado == Estado.JUGANDO) { estado = Estado.PAUSA; nivel.getJugador().setDireccion(0, 0); }
-        else if (estado == Estado.PAUSA) estado = Estado.JUGANDO;
+        if (estadoActual instanceof EstadoJugando) {
+            nivel.getJugador().setDireccion(0, 0);
+            cambiarEstado(new EstadoPausa(this, estadoActual));
+        } else if (estadoActual instanceof EstadoPausa) {
+            cambiarEstado(new EstadoJugando(this));
+        }
     }
+
     public void soltarProducto() {
-        if (estado != Estado.JUGANDO) return;
-        if (nivel.getJugador().soltarProducto()) avisar("Producto en el suelo. E: recoger de nuevo.");
+        // Solo permitir soltar el producto si estamos en pleno juego (no en pausa, menú ni resultados)
+        if (estadoActual instanceof EstadoJugando) {
+            if (nivel.getJugador().soltarProducto()) {
+                avisar("Producto en el suelo. E: recoger de nuevo.");
+            }
+        }
     }
-    public void pausar() { if (estado == Estado.JUGANDO) alternarPausa(); }
+
+    public void pausar() { 
+        if (estadoActual instanceof EstadoJugando) alternarPausa(); 
+    }
+
+    // Sobrecarga sin parámetros para mantener compatibilidad con las pruebas unitarias
     public void terminarPartida() {
-        if (estado != Estado.JUGANDO && estado != Estado.PAUSA) return;
-        estado = Estado.DERROTA; nivel.getJugador().setDireccion(0, 0);
+        // Si ya estamos en estado de victoria, final de campaña, o el último resultado fue victoria, protegemos el estado
+        if (estadoActual instanceof EstadoResultado && ultimoResultadoVictoria) return;
+        if (estadoActual instanceof EstadoFinalCampana) return;
+        
+        terminarPartida(false);
+    }
+
+    public void terminarPartida(boolean victoria) {
+        if (victoria) {
+            campanaFinalizada = getNivelActual() == CatalogoNiveles.ULTIMO_NIVEL;
+            ultimoResultadoVictoria = true;
+            if (campanaFinalizada) {
+                cambiarEstado(new EstadoFinalCampana(this));
+            } else {
+                cambiarEstado(new EstadoResultado(this, true));
+            }
+        } else {
+            // Si ya habíamos ganado, una derrota posterior por error de hilo o reloj no debe sobrescribir la victoria
+            if (ultimoResultadoVictoria && (estadoActual instanceof EstadoResultado || estadoActual instanceof EstadoFinalCampana)) {
+                return;
+            }
+            nivel.getJugador().setDireccion(0, 0);
+            ultimoResultadoVictoria = false;
+            cambiarEstado(new EstadoResultado(this, false));
+        }
     }
 
     private void avisar(String texto) { mensaje = texto; duracionMensaje = 4.5; }
     public void setDireccion(int dx, int dy) { nivel.getJugador().setDireccion(dx, dy); }
-    public Estado getEstado() { return estado; }
+    
+    // Método adaptador para que GamePanel y las pruebas consulten el estado clásico
+    public Estado getEstado() {
+        if (estadoActual instanceof EstadoMenu) return Estado.MENU;
+        if (estadoActual instanceof EstadoJugando) return Estado.JUGANDO;
+        if (estadoActual instanceof EstadoPausa) return Estado.PAUSA;
+        if (estadoActual instanceof EstadoResultado) {
+            return ultimoResultadoVictoria ? Estado.VICTORIA : Estado.DERROTA;
+        }
+        if (estadoActual instanceof EstadoFinalCampana) return Estado.VICTORIA;
+        return Estado.JUGANDO;
+    }
+
+    // Métodos de consulta
     public Nivel getNivel() { return nivel; }
     public int getPuntuacion() { return puntuacion; }
     public double getTiempoRestante() { return tiempoRestante; }
+    
     public String getMensaje() {
-        if (estado == Estado.VICTORIA) {
-            if (campanaFinalizada) return "Campana completada: seis niveles superados. R / ENTER: nueva campana.";
-            return haySiguienteNivel() ? "Nivel superado. ENTER: siguiente nivel. R: nueva campana."
-                    : "Nivel " + (getNivelActual() + 1) + " pendiente de integracion. R: nueva campana.";
-        }
-        if (estado == Estado.DERROTA) return "ENTER: reintentar nivel. R: nueva campana. Se descartan los puntos del intento fallido.";
         return duracionMensaje > 0 ? mensaje : getAyudaContextual();
     }
 
