@@ -9,7 +9,7 @@ import com.supermercado.obstacles.*;
 import com.supermercado.ui.GamePanel;
 import com.supermercado.ui.GameWindow;
 import java.awt.event.*;
-import java.util.List;
+
 import javax.swing.*;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
@@ -255,7 +255,7 @@ public final class PruebasJuan {
         }
         verificar(j.getEstado() == Juego.Estado.VICTORIA && j.getPuntuacion() == 1200,
                 "Gana nivel 2 con 600 puntos propios y conserva 600 del primero");
-        verificar(!j.isCampanaFinalizada() && !j.avanzarNivel(), "Nivel 3 sigue pendiente; no inventa final de campana");
+        verificar(!j.isCampanaFinalizada() && j.avanzarNivel() && j.getNivelActual() == 3, "El juego avanza con exito al Nivel 3 creado por Aldayer");
         System.out.printf("Nivel 2 recorrido a velocidad real: 6/6, %.1f segundos restantes.%n", j.getTiempoRestante());
         capturar(j, "juan-nivel2-victoria.png");
 

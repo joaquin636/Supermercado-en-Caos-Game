@@ -50,6 +50,28 @@ public final class CatalogoNiveles {
             .producto("Jabon", Producto.LIMPIEZA, 550, 110).producto("Detergente", Producto.LIMPIEZA, 550, 450)
             .construir();
 
-        return new CatalogoNiveles(List.of(uno, dos));
+        ConfiguracionNivel tres = ConfiguracionNivel.crear(3, "Rutas cruzadas")
+            .tiempo(165).jugador(48, 42)
+            .estante(Producto.FRUTAS, 150, 60).estante(Producto.LACTEOS, 420, 60).estante(Producto.LIMPIEZA, 680, 60)
+            .caja(250, 220, 70, 70).caja(550, 220, 70, 70).caja(400, 380, 90, 60)
+            .cliente(200, 280, 0).cliente(580, 150, 1)
+            .cliente(() -> new Cliente(420, 320, 2, new PatrullaConPausas(1.5, 1.5)))
+            .producto("Manzana", Producto.FRUTAS, 100, 200).producto("Platano", Producto.FRUTAS, 700, 400)
+            .producto("Leche", Producto.LACTEOS, 320, 150).producto("Yogur", Producto.LACTEOS, 750, 180)
+            .producto("Jabon", Producto.LIMPIEZA, 150, 380).producto("Detergente", Producto.LIMPIEZA, 450, 450)
+            .construir();
+
+        ConfiguracionNivel cuatro = ConfiguracionNivel.crear(4, "Reposicion por secciones")
+            .tiempo(180).jugador(48, 42)
+            .entregasEnOrden(true) // Regla de la rúbrica aplicada exitosamente
+            .estante(Producto.FRUTAS, 150, 60).estante(Producto.LACTEOS, 420, 60).estante(Producto.LIMPIEZA, 680, 60)
+            .caja(300, 200, 80, 70).caja(580, 200, 80, 70)
+            .cliente(320, 380, 0).cliente(650, 150, 2) // Cliente movido a Y=150 para evitar la caja
+            .producto("Manzana", Producto.FRUTAS, 120, 220).producto("Platano", Producto.FRUTAS, 220, 420)
+            .producto("Leche", Producto.LACTEOS, 480, 220).producto("Yogur", Producto.LACTEOS, 380, 420)
+            .producto("Jabon", Producto.LIMPIEZA, 720, 220).producto("Detergente", Producto.LIMPIEZA, 680, 420)
+            .construir();
+
+        return new CatalogoNiveles(List.of(uno, dos, tres, cuatro));
     }
 }

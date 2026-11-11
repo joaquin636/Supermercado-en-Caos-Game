@@ -81,7 +81,7 @@ public final class PruebasCampana {
         ConfiguracionNivel.Builder b=ConfiguracionNivel.crear(1,"Copia defensiva").producto("A",Producto.FRUTAS,100,200).estante(Producto.FRUTAS,170,60);
         ConfiguracionNivel receta=b.construir(); b.producto("B",Producto.FRUTAS,400,400);
         verificar(receta.getProductos().size()==1,"Builder no altera configuracion construida");
-        rechaza(() -> new Nivel(3),"No inventa nivel 3");
+        rechaza(() -> new Nivel(5),"No inventa nivel 5");
         rechaza(() -> ConfiguracionNivel.crear(1,"Tiempo invalido").tiempo(0).construir(),"Valida tiempo");
         rechaza(() -> ConfiguracionNivel.crear(1,"Sin objetivo").construir(),"Rechaza nivel vacio");
         rechaza(() -> new CatalogoNiveles(List.of(fixture(1),fixture(1))),"Rechaza numeros duplicados");
@@ -160,7 +160,10 @@ public final class PruebasCampana {
         verificar(ImageIO.write(imagen,"png",destino.toFile()),"Render Swing genera PNG: "+nombre);
     }
     private static void interfaz() throws Exception {
-        Juego j=new Juego();GamePanel panel=new GamePanel(j,false);pulsar(panel,KeyEvent.VK_ENTER);
+        // Le damos a la prueba un catalogo de 2 niveles para que pueda probar la pantalla de "Falta Nivel"
+        CatalogoNiveles c = CatalogoNiveles.predeterminado();
+        Juego j = new Juego(new CatalogoNiveles(List.of(c.obtener(1), c.obtener(2))));
+        GamePanel panel=new GamePanel(j,false);pulsar(panel,KeyEvent.VK_ENTER);
         verificar(panel.getTextoTiempo().equals("TIEMPO 03:00"),"HUD lee 180 del modelo");
         panel.avanzarFotograma(.1); cerca(j.getTiempoRestante(),179.9,"Panel actualiza modelo a pasos fijos");
         panel.avanzarFotograma(.5); cerca(j.getTiempoRestante(),179.4,"Fotograma lento no pierde tiempo real");
