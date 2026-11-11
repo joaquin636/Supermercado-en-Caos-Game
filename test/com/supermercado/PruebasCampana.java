@@ -54,10 +54,10 @@ public final class PruebasCampana {
         SwingUtilities.invokeAndWait(() -> {
             try { interfaz(); } catch(Exception e) { throw new RuntimeException(e); }
         });
-        System.out.println("OK J1/J2/J3: " + comprobaciones + " comprobaciones adicionales; fixtures de seis niveles solo en pruebas.");
+        System.out.println("OK J1/J2/J3: " + comprobaciones + " comprobaciones adicionales de infraestructura y fixtures de prueba.");
     }
     private static void reloj() {
-        Juego j = new Juego(); verificar(j.getEstado()==Juego.Estado.MENU,"Inicio en menu");
+        Juego j = PartidasPrueba.crear(); verificar(j.getEstado()==Juego.Estado.MENU,"Inicio en menu");
         j.iniciarPartida(); cerca(j.getTiempoRestante(),180,"Nivel 1 empieza en 180 segundos");
         for(int i=0;i<60;i++) j.actualizar();
         cerca(j.getTiempoRestante(),179,"60 pasos descuentan un segundo sin choques");
@@ -81,7 +81,7 @@ public final class PruebasCampana {
         ConfiguracionNivel.Builder b=ConfiguracionNivel.crear(1,"Copia defensiva").producto("A",Producto.FRUTAS,100,200).estante(Producto.FRUTAS,170,60);
         ConfiguracionNivel receta=b.construir(); b.producto("B",Producto.FRUTAS,400,400);
         verificar(receta.getProductos().size()==1,"Builder no altera configuracion construida");
-        rechaza(() -> new Nivel(5),"No inventa nivel 5");
+        rechaza(() -> new Nivel(7),"Rechaza nivel fuera de campana");
         rechaza(() -> ConfiguracionNivel.crear(1,"Tiempo invalido").tiempo(0).construir(),"Valida tiempo");
         rechaza(() -> ConfiguracionNivel.crear(1,"Sin objetivo").construir(),"Rechaza nivel vacio");
         rechaza(() -> new CatalogoNiveles(List.of(fixture(1),fixture(1))),"Rechaza numeros duplicados");
@@ -99,7 +99,7 @@ public final class PruebasCampana {
             .tiempo(120).entregasEnOrden(true)
             .estante(Producto.FRUTAS,170,60).estante(Producto.LACTEOS,430,60)
             .producto("Manzana",Producto.FRUTAS,104,220).producto("Leche",Producto.LACTEOS,440,270).construir();
-        Juego orden=new Juego(new CatalogoNiveles(List.of(c.obtener(1), demoOrdenada)));
+        Juego orden=PartidasPrueba.crear(new CatalogoNiveles(List.of(c.obtener(1), demoOrdenada)));
         orden.iniciarPartida(); completar(orden); verificar(orden.avanzarNivel(),"Avanza a fixture ordenado");
         Producto segundo=orden.getNivel().getProductos().get(1);
         orden.getNivel().getJugador().setPosicion(segundo.getX(),segundo.getY()); orden.interactuar();
@@ -111,13 +111,13 @@ public final class PruebasCampana {
             && !orden.isCampanaFinalizada(),"Falta nivel 3: no salta ni declara campana finalizada");
         ConfiguracionNivel parcial=ConfiguracionNivel.crear(1,"Objetivo parcial").objetivoEntregas(1)
             .estante(Producto.FRUTAS,170,60).producto("A",Producto.FRUTAS,100,200).producto("B",Producto.FRUTAS,400,400).construir();
-        Juego objetivo=new Juego(new CatalogoNiveles(List.of(parcial)));objetivo.iniciarPartida();entregar(objetivo,0);
+        Juego objetivo=PartidasPrueba.crear(new CatalogoNiveles(List.of(parcial)));objetivo.iniciarPartida();entregar(objetivo,0);
         verificar(objetivo.getEstado()==Juego.Estado.VICTORIA,"Objetivo configurable independiente de cantidad total");
     }
     private static void campana() {
         List<ConfiguracionNivel> fixtures=new ArrayList<>();
         for(int i=1;i<=6;i++)fixtures.add(fixture(i));
-        Juego j=new Juego(new CatalogoNiveles(fixtures));j.iniciarPartida();
+        Juego j=PartidasPrueba.crear(new CatalogoNiveles(fixtures));j.iniciarPartida();
         verificar(j.getNivelActual()==1 && j.getPuntuacion()==0 && j.getPuntuacionInicioNivel()==0,"Nueva campana limpia");
         verificar(!j.avanzarNivel() && !j.reintentarNivel(),"No avanza ni reintenta jugando");
         completar(j); verificar(j.getPuntuacion()==200,"Puntos de nivel 1");
@@ -162,7 +162,7 @@ public final class PruebasCampana {
     private static void interfaz() throws Exception {
         // Le damos a la prueba un catalogo de 2 niveles para que pueda probar la pantalla de "Falta Nivel"
         CatalogoNiveles c = CatalogoNiveles.predeterminado();
-        Juego j = new Juego(new CatalogoNiveles(List.of(c.obtener(1), c.obtener(2))));
+        Juego j = PartidasPrueba.crear(new CatalogoNiveles(List.of(c.obtener(1), c.obtener(2))));
         GamePanel panel=new GamePanel(j,false);pulsar(panel,KeyEvent.VK_ENTER);
         verificar(panel.getTextoTiempo().equals("TIEMPO 03:00"),"HUD lee 180 del modelo");
         panel.avanzarFotograma(.1); cerca(j.getTiempoRestante(),179.9,"Panel actualiza modelo a pasos fijos");
@@ -179,13 +179,13 @@ public final class PruebasCampana {
         verificar(j.getNivelActual()==1 && j.getPuntuacion()==0,"R inicia nueva campana desde victoria");
         agotar(j);pulsar(panel,KeyEvent.VK_R);verificar(j.getNivelActual()==1 && j.getPuntuacion()==0,"R inicia nueva desde derrota");
         List<ConfiguracionNivel> fixtures=new ArrayList<>();for(int i=1;i<=6;i++)fixtures.add(fixture(i));
-        Juego finalJuego=new Juego(new CatalogoNiveles(fixtures));finalJuego.iniciarPartida();
+        Juego finalJuego=PartidasPrueba.crear(new CatalogoNiveles(fixtures));finalJuego.iniciarPartida();
         for(int i=1;i<=6;i++){completar(finalJuego);if(i<6)finalJuego.avanzarNivel();}
         GamePanel finalPanel=new GamePanel(finalJuego,false);captura(finalPanel,"11_final_fixture.png");
         pulsar(finalPanel,KeyEvent.VK_ENTER);verificar(finalJuego.getNivelActual()==1 && !finalJuego.isCampanaFinalizada(),"Enter tras final reinicia");
         ConfiguracionNivel.Builder larga=ConfiguracionNivel.crear(1,"Lista larga de prueba").estante(Producto.FRUTAS,170,60);
         for(int i=0;i<9;i++)larga.producto("Fruta "+i,Producto.FRUTAS,40+i*50,400);
-        Juego lista=new Juego(new CatalogoNiveles(List.of(larga.construir())));lista.iniciarPartida();
+        Juego lista=PartidasPrueba.crear(new CatalogoNiveles(List.of(larga.construir())));lista.iniciarPartida();
         captura(new GamePanel(lista,false),"12_lista_fixture.png");
     }
 }

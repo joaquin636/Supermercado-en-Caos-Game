@@ -21,7 +21,7 @@ public final class PruebasJuego {
         if (!condicion) throw new AssertionError(descripcion);
         comprobaciones++;
     }
-    private static Juego nuevo() { Juego j = new Juego(); j.iniciarPartida(); return j; }
+    private static Juego nuevo() { Juego j = PartidasPrueba.crear(); j.iniciarPartida(); return j; }
     private static void pulsar(GamePanel panel, int tecla, boolean soltar) {
         Object nombre = panel.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).get(KeyStroke.getKeyStroke(tecla, 0, soltar));
         verificar(nombre != null, "Tecla registrada");
@@ -33,6 +33,9 @@ public final class PruebasJuego {
         PruebasCampana.ejecutar();
         PruebasJuan.ejecutar();
         PruebasEstados.ejecutar();
+        PruebasAldayer.ejecutar();
+        PruebasIntegracion.ejecutar();
+        PruebasHttp.ejecutar();
         SwingUtilities.invokeAndWait(() -> {
             try { menu(); teclado(); renderizar(args.length == 0 ? "build/capturas-pruebas" : args[0]); }
             catch (Exception e) { throw new RuntimeException(e); }
@@ -147,7 +150,7 @@ public final class PruebasJuego {
         }
     }
     private static void teclado() {
-        Juego j = new Juego(); GamePanel panel = new GamePanel(j, false);
+        Juego j = PartidasPrueba.crear(); GamePanel panel = new GamePanel(j, false);
         pulsar(panel, KeyEvent.VK_ENTER, false); panel.avanzarFotograma(Personaje.PASO);
         verificar(j.getEstado() == Juego.Estado.JUGANDO, "Enter inicia");
         double x = j.getNivel().getJugador().getX();
@@ -172,7 +175,7 @@ public final class PruebasJuego {
         verificar(j.getEstado()==Juego.Estado.JUGANDO,"P reanuda");
     }
     private static void menu() {
-        Juego j=new Juego();GamePanel p=new GamePanel(j,false);
+        Juego j=PartidasPrueba.crear();GamePanel p=new GamePanel(j,false);
         pulsar(p,KeyEvent.VK_DOWN,false);p.avanzarFotograma(.02);
         pulsar(p,KeyEvent.VK_ENTER,false);p.avanzarFotograma(.02);
         verificar(j.getEstado()==Juego.Estado.MENU,"Instrucciones no inicia la partida");
@@ -185,7 +188,7 @@ public final class PruebasJuego {
         File dir=new File(carpeta);
         if (dir.getCanonicalFile().toPath().startsWith(new File("docs").getCanonicalFile().toPath()))
             throw new IllegalArgumentException("Las pruebas no pueden escribir en docs."); if (!dir.isDirectory() && !dir.mkdirs()) throw new IllegalStateException("No se pudo crear carpeta de capturas");
-        Juego j=new Juego();GamePanel panel=new GamePanel(j,false);panel.setSize(1280,800);
+        Juego j=PartidasPrueba.crear();GamePanel panel=new GamePanel(j,false);panel.setSize(1280,800);
         guardar(panel,new File(dir,"01_menu.png"));
         j.iniciarPartida();guardar(panel,new File(dir,"02_partida.png"));
         j.getNivel().getJugador().setPosicion(104,220);j.interactuar();guardar(panel,new File(dir,"03_producto.png"));
@@ -200,7 +203,7 @@ public final class PruebasJuego {
         }
         verificar(j.getEstado()==Juego.Estado.VICTORIA,"Captura corresponde a victoria real");
         guardar(panel,new File(dir,"06_victoria.png"));
-        Juego menu=new Juego();GamePanel instrucciones=new GamePanel(menu,false);instrucciones.setSize(1280,800);
+        Juego menu=PartidasPrueba.crear();GamePanel instrucciones=new GamePanel(menu,false);instrucciones.setSize(1280,800);
         pulsar(instrucciones,KeyEvent.VK_DOWN,false);instrucciones.avanzarFotograma(.02);
         pulsar(instrucciones,KeyEvent.VK_ENTER,false);instrucciones.avanzarFotograma(.02);
         guardar(instrucciones,new File(dir,"07_instrucciones.png"));

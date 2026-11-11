@@ -9,7 +9,7 @@ import java.util.*;
 public final class CatalogoNiveles {
     public static final int ULTIMO_NIVEL = 6;
     private final Map<Integer, ConfiguracionNivel> niveles;
-    
+
     public CatalogoNiveles(Collection<ConfiguracionNivel> configuraciones) {
         Map<Integer, ConfiguracionNivel> mapa = new TreeMap<>();
         for (ConfiguracionNivel c : configuraciones)
@@ -17,15 +17,15 @@ public final class CatalogoNiveles {
         if (!mapa.containsKey(1)) throw new IllegalArgumentException("El catalogo necesita el nivel 1.");
         niveles = Collections.unmodifiableMap(mapa);
     }
-    
+
     public boolean contiene(int numero) { return niveles.containsKey(numero); }
-    
+
     public ConfiguracionNivel obtener(int numero) {
         ConfiguracionNivel c = niveles.get(numero);
         if (c == null) throw new IllegalArgumentException("Configuracion pendiente del nivel " + numero);
         return c;
     }
-    
+
     public static CatalogoNiveles predeterminado() {
         ConfiguracionNivel uno = ConfiguracionNivel.crear(1, "Turno de reposicion")
             .tiempo(180).jugador(48, 42)
@@ -63,15 +63,43 @@ public final class CatalogoNiveles {
 
         ConfiguracionNivel cuatro = ConfiguracionNivel.crear(4, "Reposicion por secciones")
             .tiempo(180).jugador(48, 42)
-            .entregasEnOrden(true) // Regla de la rúbrica aplicada exitosamente
+            .entregasEnOrden(true) // Alterna frutas, lacteos y limpieza dos veces
             .estante(Producto.FRUTAS, 150, 60).estante(Producto.LACTEOS, 420, 60).estante(Producto.LIMPIEZA, 680, 60)
             .caja(300, 200, 80, 70).caja(580, 200, 80, 70)
             .cliente(320, 380, 0).cliente(650, 150, 2) // Cliente movido a Y=150 para evitar la caja
-            .producto("Manzana", Producto.FRUTAS, 120, 220).producto("Platano", Producto.FRUTAS, 220, 420)
-            .producto("Leche", Producto.LACTEOS, 480, 220).producto("Yogur", Producto.LACTEOS, 380, 420)
-            .producto("Jabon", Producto.LIMPIEZA, 720, 220).producto("Detergente", Producto.LIMPIEZA, 680, 420)
+            .producto("Manzana", Producto.FRUTAS, 120, 220).producto("Leche", Producto.LACTEOS, 480, 220)
+            .producto("Jabon", Producto.LIMPIEZA, 720, 220).producto("Platano", Producto.FRUTAS, 220, 420)
+            .producto("Yogur", Producto.LACTEOS, 380, 420).producto("Detergente", Producto.LIMPIEZA, 680, 420)
             .construir();
 
-        return new CatalogoNiveles(List.of(uno, dos, tres, cuatro));
+        // Valores iniciales de balance. Las rutas y los ciclos se comprueban caminando en las pruebas.
+        ConfiguracionNivel cinco = ConfiguracionNivel.crear(5, "Cruce de reposicion")
+            .tiempo(155).jugador(48, 42)
+            .estante(Producto.FRUTAS, 80, 60).estante(Producto.LACTEOS, 690, 230)
+            .estante(Producto.LIMPIEZA, 90, 420)
+            .caja(420, 100, 80, 220).caja(420, 400, 80, 60).caja(150, 250, 100, 70)
+            .cliente(310, 170, 1).cliente(610, 470, 3).cliente(740, 370, 2)
+            .cliente(() -> new Cliente(260, 365, 0, new PatrullaConPausas(1.4, .8)))
+            .cliente(() -> new Cliente(550, 170, 1, new PatrullaConPausas(2.2, .6)))
+            .producto("Manzana", Producto.FRUTAS, 780, 80).producto("Platano", Producto.FRUTAS, 580, 450)
+            .producto("Leche", Producto.LACTEOS, 120, 200).producto("Yogur", Producto.LACTEOS, 300, 460)
+            .producto("Jabon", Producto.LIMPIEZA, 590, 110).producto("Detergente", Producto.LIMPIEZA, 780, 410)
+            .construir();
+
+        ConfiguracionNivel seis = ConfiguracionNivel.crear(6, "Ultimo turno")
+            .tiempo(100).jugador(48, 42).entregasEnOrden(true)
+            .estante(Producto.FRUTAS, 90, 70).estante(Producto.LACTEOS, 650, 70)
+            .estante(Producto.LIMPIEZA, 365, 430)
+            .caja(350, 160, 80, 200).caja(550, 260, 80, 160)
+            .caja(130, 320, 110, 70).caja(730, 330, 100, 70)
+            .cliente(310, 210, 1).cliente(590, 460, 3).cliente(720, 180, 2).cliente(70, 370, 3)
+            .cliente(() -> new Cliente(480, 200, 1, new PatrullaConPausas(1.2, .7)))
+            .cliente(() -> new Cliente(850, 460, 2, new PatrullaConPausas(1.8, .6)))
+            .producto("Leche", Producto.LACTEOS, 150, 250).producto("Manzana", Producto.FRUTAS, 790, 430)
+            .producto("Jabon", Producto.LIMPIEZA, 700, 230).producto("Yogur", Producto.LACTEOS, 460, 350)
+            .producto("Platano", Producto.FRUTAS, 280, 440).producto("Detergente", Producto.LIMPIEZA, 450, 120)
+            .construir();
+
+        return new CatalogoNiveles(List.of(uno, dos, tres, cuatro, cinco, seis));
     }
 }

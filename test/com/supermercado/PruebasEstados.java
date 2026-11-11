@@ -2,6 +2,8 @@ package com.supermercado;
 
 import com.supermercado.game.Juego;
 import com.supermercado.game.estados.EstadoResultado;
+import com.supermercado.game.estados.EstadoJuego;
+import com.supermercado.game.estados.EstadoMenu;
 import com.supermercado.obstacles.Estante;
 import com.supermercado.ui.GamePanel;
 import java.awt.event.ActionEvent;
@@ -29,6 +31,8 @@ public final class PruebasEstados {
             transicionesDeResultado();
             menuYReinicio();
             resultadoUnico();
+            comandosDelPanel();
+            comandosDeMenu();
         });
         if (!fallos.isEmpty()) throw new AssertionError(String.join("\n", fallos));
         System.out.println("OK State: " + comprobaciones + " comprobaciones de permisos y transiciones.");
@@ -40,7 +44,7 @@ public final class PruebasEstados {
     }
 
     private static Juego nuevo() {
-        Juego juego = new Juego();
+        Juego juego = PartidasPrueba.crear();
         juego.iniciarPartida();
         return juego;
     }
@@ -124,7 +128,7 @@ public final class PruebasEstados {
     }
 
     private static void menuYReinicio() {
-        Juego juego = new Juego();
+        Juego juego = PartidasPrueba.crear();
         var producto = juego.getNivel().getProductos().get(0);
         juego.getNivel().getJugador().setPosicion(producto.getX(), producto.getY());
         juego.interactuar();
@@ -153,4 +157,48 @@ public final class PruebasEstados {
         try { juego.cambiarEstado(null); } catch (NullPointerException e) { rechazo = true; }
         verificar(rechazo && juego.getEstadoActual() == estado, "Rechaza estado nulo sin corromper el estado actual");
     }
+    private static void comandosDelPanel() {
+        Juego juego = PartidasPrueba.crear();
+        List<Integer> recibidas = new ArrayList<>();
+        juego.cambiarEstado(new EstadoJuego() {
+            @Override public void actualizar() {}
+            @Override public void manejarTeclado(int tecla, boolean presionada) {
+                if (presionada) recibidas.add(tecla);
+            }
+        });
+        GamePanel panel = new GamePanel(juego, false);
+        int[] teclas = {KeyEvent.VK_E, KeyEvent.VK_Q, KeyEvent.VK_P,
+                KeyEvent.VK_ESCAPE, KeyEvent.VK_ENTER, KeyEvent.VK_R};
+        for (int tecla : teclas) pulsar(panel, tecla);
+        verificar(recibidas.equals(List.of(KeyEvent.VK_E, KeyEvent.VK_Q, KeyEvent.VK_ESCAPE,
+                KeyEvent.VK_ESCAPE, KeyEvent.VK_ENTER, KeyEvent.VK_R)),
+                "El mapa real del panel delega una vez cada accion al estado activo");
+    }
+
+    private static void comandosDeMenu() {
+        Juego juego = nuevo();
+        completar(juego);
+        juego.cambiarEstado(new EstadoMenu(juego));
+        juego.manejarTeclado(KeyEvent.VK_ENTER, true);
+        verificar(juego.getEstado() == Juego.Estado.JUGANDO && juego.getPuntuacion() == 0
+                && juego.getNivel().getEntregados() == 0, "EstadoMenu inicia mediante la operacion de campana limpia");
+
+        Juego menu = PartidasPrueba.crear();
+        GamePanel panel = new GamePanel(menu, false);
+        pulsar(panel, KeyEvent.VK_DOWN);
+        pulsar(panel, KeyEvent.VK_ENTER);
+        verificar(menu.getEstado() == Juego.Estado.MENU, "Instrucciones no inicia la simulacion");
+        pulsar(panel, KeyEvent.VK_ESCAPE);
+        pulsar(panel, KeyEvent.VK_UP);
+        pulsar(panel, KeyEvent.VK_ENTER);
+        verificar(menu.getEstado() == Juego.Estado.JUGANDO && menu.getTiempoRestante() == 180,
+                "Volver de instrucciones permite iniciar con tiempo completo");
+
+        double tiempo = menu.getTiempoRestante();
+        pulsar(panel, KeyEvent.VK_R);
+        pulsar(panel, KeyEvent.VK_ENTER);
+        verificar(menu.getEstado() == Juego.Estado.JUGANDO && menu.getTiempoRestante() == tiempo,
+                "Enter y R durante partida no reinician ni saltan niveles");
+    }
+
 }

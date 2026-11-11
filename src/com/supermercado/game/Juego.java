@@ -5,34 +5,64 @@ import com.supermercado.levels.*;
 import com.supermercado.obstacles.Estante;
 import com.supermercado.products.Producto;
 import com.supermercado.game.estados.*;
+import com.supermercado.game.eventos.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /** Coordinador del modelo de juego adaptado al Patrón State con compatibilidad de pruebas. */
 public final class Juego {
-    
+
     // Enum de compatibilidad para GamePanel y las pruebas automatizadas existentes
     public enum Estado { MENU, JUGANDO, PAUSA, VICTORIA, DERROTA }
 
     private final CatalogoNiveles catalogo;
+    private final List<ObservadorJuego> observadores = new ArrayList<>();
+    private final RegistroEstadisticas estadisticas;
     private int puntuacion;
     private int puntuacionInicioNivel;
     private boolean campanaFinalizada;
     private double tiempoRestante;
     private Nivel nivel;
-    
+
     // Estado activo mediante el Patrón State
     private EstadoJuego estadoActual;
-    
+
     private String mensaje = "Organiza los seis productos antes de que termine el tiempo.";
     private double duracionMensaje;
 
     public Juego() { this(CatalogoNiveles.predeterminado()); }
-    
-    public Juego(CatalogoNiveles catalogo) {
+
+    public Juego(CatalogoNiveles catalogo) { this(catalogo, new RegistroEstadisticas()); }
+
+    public Juego(CatalogoNiveles catalogo, RegistroEstadisticas estadisticas) {
+        this.estadisticas = java.util.Objects.requireNonNull(estadisticas);
+        agregarObservador(estadisticas);
         this.catalogo = java.util.Objects.requireNonNull(catalogo);
-        nivel = new Nivel(catalogo.obtener(1)); 
+        nivel = new Nivel(catalogo.obtener(1));
         tiempoRestante = nivel.getTiempoLimite();
         // Arranca en el Menú principal
         this.estadoActual = new EstadoMenu(this);
+    }
+
+    public void agregarObservador(ObservadorJuego observador) {
+        if (observador != null && !observadores.contains(observador)) {
+            observadores.add(observador);
+        }
+    }
+
+    public void retirarObservador(ObservadorJuego observador) {
+        observadores.remove(observador);
+    }
+
+    public RegistroEstadisticas getEstadisticas() {
+        return estadisticas;
+    }
+
+    private void notificarEvento(TipoEvento tipo, int deltaPuntos, String detalle) {
+        EventoJuego evento = new EventoJuego(tipo, getNivelActual(), deltaPuntos, puntuacion, detalle);
+        for (ObservadorJuego obs : new ArrayList<>(observadores)) {
+            obs.onEvento(evento);
+        }
     }
 
     public void cambiarEstado(EstadoJuego nuevoEstado) {
@@ -43,11 +73,12 @@ public final class Juego {
         return estadoActual;
     }
 
-    public void cargarNivel(int numero) {
+    private void cargarNivel(int numero) {
         Nivel nuevo = new Nivel(catalogo.obtener(numero));
-        nivel = nuevo; 
+        nivel = nuevo;
         puntuacionInicioNivel = puntuacion;
-        tiempoRestante = nivel.getTiempoLimite(); 
+        estadisticas.iniciarIntento(puntuacionInicioNivel);
+        tiempoRestante = nivel.getTiempoLimite();
         avisar(nivel.getObjetivo());
         // Al cargar nivel, pasamos al estado de juego activo
         cambiarEstado(new EstadoJugando(this));
@@ -58,18 +89,18 @@ public final class Juego {
         if (!(estadoActual instanceof EstadoResultado resultado) || !resultado.isVictoria() || campanaFinalizada) return false;
         int siguiente = getNivelActual() + 1;
         if (!catalogo.contiene(siguiente)) {
-            avisar("Nivel " + siguiente + " pendiente de integracion. R: nueva campana."); 
+            avisar("Nivel " + siguiente + " pendiente de integracion. R: nueva campana.");
             return false;
         }
-        cargarNivel(siguiente); 
+        cargarNivel(siguiente);
         return true;
     }
 
     public boolean reintentarNivel() {
         if (!(estadoActual instanceof EstadoResultado resultado) || resultado.isVictoria()) return false;
         int numero = getNivelActual();
-        puntuacion = puntuacionInicioNivel; 
-        cargarNivel(numero); 
+        puntuacion = puntuacionInicioNivel;
+        cargarNivel(numero);
         return true;
     }
 
@@ -81,8 +112,9 @@ public final class Juego {
     }
 
     public void iniciarPartida() {
-        puntuacion = 0; 
-        campanaFinalizada = false; 
+        puntuacion = 0;
+        campanaFinalizada = false;
+        estadisticas.reiniciar();
         cargarNivel(1);
         avisar("Acercate a un producto y pulsa E para recogerlo.");
     }
@@ -98,19 +130,22 @@ public final class Juego {
 
     // --- Lógica interna de simulación (llamada por EstadoJugando) ---
     public void actualizarSimulacionPartida() {
+        if (!(estadoActual instanceof EstadoJugando)) return;
         nivel.actualizarPersonajes();
         duracionMensaje = Math.max(0, duracionMensaje - Personaje.PASO);
         Jugador jugador = nivel.getJugador();
         for (Personaje p : nivel.getPersonajes()) {
             if (p instanceof Cliente && p.getBounds().intersects(jugador.getBounds()) && jugador.recibirImpacto()) {
                 tiempoRestante = Math.max(0, tiempoRestante - 5);
-                avisar("Choque con cliente: -5 segundos. Tienes 1 segundo de proteccion.");
+                String detalle = "Choque con cliente: -5 segundos. Tienes 1 segundo de proteccion.";
+                avisar(detalle);
+                notificarEvento(TipoEvento.CHOQUE_CLIENTE, 0, detalle);
             }
         }
         tiempoRestante = Math.max(0, tiempoRestante - Personaje.PASO);
-        if (tiempoRestante < 1e-9) { 
-            tiempoRestante = 0; 
-            terminarPartida(false); 
+        if (tiempoRestante < 1e-9) {
+            tiempoRestante = 0;
+            terminarPartida(false);
         }
     }
 
@@ -126,25 +161,27 @@ public final class Juego {
         } else {
             Estante e = nivel.estanteCercano();
             if (e == null) { avisar("Lleva el producto cerca de su estante y pulsa E."); return; }
-            if (!e.aceptaProducto(enMano)) { avisar("Estante incorrecto: este producto pertenece a " + enMano.getCategoria() + "."); return; }
+            if (!e.aceptaProducto(enMano)) {
+                String detalle = "Estante incorrecto: este producto pertenece a " + enMano.getCategoria() + ".";
+                avisar(detalle);
+                notificarEvento(TipoEvento.ENTREGA_INCORRECTA, 0, detalle);
+                return;
+            }
             if (!nivel.permiteEntrega(enMano)) {
                 Producto siguiente = nivel.getSiguienteProducto();
-                avisar("Fuera de orden. Sigue: " + (siguiente == null ? "objetivo completado" : siguiente.getCategoria())
-                        + ". Conservas el producto. Q: dejar en suelo.");
+                String detalle = "Fuera de orden. Sigue: " + (siguiente == null ? "objetivo completado" : siguiente.getCategoria())
+                        + ". Conservas el producto. Q: dejar en suelo.";
+                avisar(detalle);
+                notificarEvento(TipoEvento.ENTREGA_INCORRECTA, 0, detalle);
                 return;
             }
             if (j.entregarProducto(e)) {
-                puntuacion += enMano.getPuntos();
-                avisar("Entrega correcta: +" + enMano.getPuntos() + " puntos.");
-                if (nivel.estaCompletado()) {
-                    j.setDireccion(0, 0);
-                    campanaFinalizada = getNivelActual() == CatalogoNiveles.ULTIMO_NIVEL;
-                    if (campanaFinalizada) {
-                        cambiarEstado(new EstadoFinalCampana(this));
-                    } else {
-                        cambiarEstado(new EstadoResultado(this, true));
-                    }
-                }
+                int ganados = enMano.getPuntos();
+                puntuacion += ganados;
+                String detalle = "Entrega correcta: +" + ganados + " puntos.";
+                avisar(detalle);
+                notificarEvento(TipoEvento.ENTREGA_CORRECTA, ganados, detalle);
+                if (nivel.estaCompletado()) terminarPartida(true);
             }
         }
     }
@@ -167,8 +204,8 @@ public final class Juego {
         }
     }
 
-    public void pausar() { 
-        if (estadoActual instanceof EstadoJugando) alternarPausa(); 
+    public void pausar() {
+        if (estadoActual instanceof EstadoJugando) alternarPausa();
     }
 
     public void terminarPartida() {
@@ -178,19 +215,15 @@ public final class Juego {
     public void terminarPartida(boolean victoria) {
         if (!(estadoActual instanceof EstadoJugando) && !(estadoActual instanceof EstadoPausa)) return;
         nivel.getJugador().setDireccion(0, 0);
-        if (victoria) {
-            campanaFinalizada = getNivelActual() == CatalogoNiveles.ULTIMO_NIVEL;
-            if (campanaFinalizada) {
-                cambiarEstado(new EstadoFinalCampana(this));
-                return;
-            }
-        }
-        cambiarEstado(new EstadoResultado(this, victoria));
+        campanaFinalizada = victoria && getNivelActual() == CatalogoNiveles.ULTIMO_NIVEL;
+        if (campanaFinalizada) cambiarEstado(new EstadoFinalCampana(this));
+        else cambiarEstado(new EstadoResultado(this, victoria));
+        notificarEvento(TipoEvento.FIN_NIVEL, 0, victoria ? "VICTORIA" : "DERROTA");
     }
 
     private void avisar(String texto) { mensaje = texto; duracionMensaje = 4.5; }
     public void setDireccion(int dx, int dy) { nivel.getJugador().setDireccion(dx, dy); }
-    
+
     // Método adaptador para que GamePanel y las pruebas consulten el estado clásico
     public Estado getEstado() {
         if (estadoActual instanceof EstadoMenu) return Estado.MENU;
@@ -207,7 +240,7 @@ public final class Juego {
     public Nivel getNivel() { return nivel; }
     public int getPuntuacion() { return puntuacion; }
     public double getTiempoRestante() { return tiempoRestante; }
-    
+
     public String getMensaje() {
         if (getEstado() == Estado.VICTORIA) {
             if (campanaFinalizada) return "Campana completada: seis niveles superados. R / ENTER: nueva campana.";

@@ -1,9 +1,7 @@
 package com.supermercado.game.estados;
 
-import java.awt.Graphics2D;
-
+/** Comportamiento del modelo segun la pantalla activa. La presentacion vive en GamePanel. */
 public interface EstadoJuego {
     void actualizar();
-    void dibujar(Graphics2D g2d);
     void manejarTeclado(int keyCode, boolean pressed);
 }
