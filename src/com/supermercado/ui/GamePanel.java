@@ -2,6 +2,9 @@ package com.supermercado.ui;
 
 import com.supermercado.entities.*;
 import com.supermercado.game.Juego;
+import com.supermercado.game.eventos.BuzonMensajesHud;
+import com.supermercado.game.eventos.EventoJuego;
+import com.supermercado.game.eventos.TipoEvento;
 import com.supermercado.input.ControlTeclado;
 import com.supermercado.levels.Nivel;
 import com.supermercado.obstacles.*;
@@ -20,6 +23,7 @@ public final class GamePanel extends JPanel {
     private static final Color VERDE = new Color(25, 112, 91);
     private static final Color FONDO = new Color(245, 244, 235);
     private final Juego juego;
+    private final BuzonMensajesHud buzon = new BuzonMensajesHud(this::repaint);
     private final ControlTeclado teclado = new ControlTeclado();
     private final Timer timer;
     private final boolean automatico;
@@ -47,9 +51,15 @@ public final class GamePanel extends JPanel {
     }
     @Override public void addNotify() {
         super.addNotify(); ultimoTick = System.nanoTime();
+        juego.agregarObservador(buzon);
         if (automatico) timer.start();
     }
-    @Override public void removeNotify() { timer.stop(); super.removeNotify(); }
+    @Override public void removeNotify() {
+        timer.stop();
+        juego.retirarObservador(buzon);
+        buzon.limpiar();
+        super.removeNotify();
+    }
 
     /** Se separa del Timer para poder comprobar controles y simulacion sin una ventana. */
     public void avanzarFotograma(double segundos) {
@@ -77,23 +87,20 @@ public final class GamePanel extends JPanel {
                 repaint(); return;
             }
         }
-        boolean transicion = false;
-        if ((estado == Juego.Estado.MENU && confirmar)
-                || (reiniciar && (estado == Juego.Estado.VICTORIA || estado == Juego.Estado.DERROTA))) {
-            juego.iniciarPartida(); transicion = true;
-        } else if (confirmar && estado == Juego.Estado.DERROTA) transicion = juego.reintentarNivel();
-        else if (confirmar && estado == Juego.Estado.VICTORIA) {
-            if (juego.isCampanaFinalizada()) { juego.iniciarPartida(); transicion = true; }
-            else transicion = juego.avanzarNivel();
-        } else if (pausa) juego.alternarPausa();
-        if (transicion) {
+        // El estado activo decide cuales acciones admite. La seleccion del menu es de la vista.
+        Nivel nivelAnterior = juego.getNivel();
+        if (reiniciar) juego.manejarTeclado(KeyEvent.VK_R, true);
+        if (confirmar && juego.getNivel() == nivelAnterior) juego.manejarTeclado(KeyEvent.VK_ENTER, true);
+        if (pausa && juego.getNivel() == nivelAnterior) juego.manejarTeclado(KeyEvent.VK_ESCAPE, true);
+        if (juego.getNivel() != nivelAnterior) {
             teclado.limpiar(); acumulador = 0;
+            buzon.limpiar();
             // El fotograma de confirmacion no mueve ni descuenta tiempo del nuevo nivel.
             repaint(); return;
         }
         juego.setDireccion(teclado.ejeX(), teclado.ejeY());
-        if (soltar) juego.soltarProducto();
-        else if (interactuar) juego.interactuar();
+        if (soltar) juego.manejarTeclado(KeyEvent.VK_Q, true);
+        else if (interactuar) juego.manejarTeclado(KeyEvent.VK_E, true);
         if (juego.getEstado() == Juego.Estado.JUGANDO) {
             // Recuperar todos los pasos: un fotograma lento no debe regalar tiempo.
             acumulador += Math.max(segundos, 0);
@@ -303,15 +310,27 @@ public final class GamePanel extends JPanel {
         texto(g,p==null?"Sin producto":p.getNombre(),521,290,11,CREMA);
         texto(g,p==null?"E para recoger":p.getCategoria(),521,309,10,CREMA);
         marco(g,12,334,616,60);
-        String mensaje=juego.getMensaje();
+        String mensaje = juego.getMensaje();
+        Color colorMensaje = CREMA;
+        EventoJuego evento = buzon.getUltimoEvento();
+        if (evento != null && evento.getNivel() == juego.getNivelActual()) {
+            if (evento.getDetalle().equals(mensaje)) {
+                mensaje = evento.getDetalle();
+                colorMensaje = ORO;
+            } else if (evento.getTipo() == TipoEvento.FIN_NIVEL
+                    && (juego.getEstado() == Juego.Estado.VICTORIA || juego.getEstado() == Juego.Estado.DERROTA)) {
+                mensaje = evento.getDetalle() + ". " + mensaje;
+                colorMensaje = ORO;
+            }
+        }
         // Medir con la misma fuente utilizada para dibujar el mensaje.
         int linea=0;String actual="";
         g.setFont(fuente(12));
         for(String palabra:mensaje.split(" ")) {
-            if(g.getFontMetrics().stringWidth(actual+palabra)>590){texto(g,actual,24,352+linea*14,12,CREMA);linea++;actual="";}
+            if(g.getFontMetrics().stringWidth(actual+palabra)>590){texto(g,actual,24,352+linea*14,12,colorMensaje);linea++;actual="";}
             actual+=palabra+" ";
         }
-        texto(g,actual,24,352+linea*14,12,CREMA);
+        texto(g,actual,24,352+linea*14,12,colorMensaje);
         texto(g,"WASD / FLECHAS: mover     E: interactuar     Q: dejar     P / ESC: pausa",24,384,11,ORO);
     }
     private void pantalla(Graphics2D g) {
@@ -338,6 +357,11 @@ public final class GamePanel extends JPanel {
             centrado(g,titulo,130,24,ORO);
             centrado(g,"Nivel "+juego.getNivelActual()+" - "+juego.getNivel().getConfiguracion().getIdentificacion(),154,12,CREMA);
             centrado(g,"Entregas: "+juego.getNivel().getEntregados()+" / "+juego.getNivel().getObjetivoEntregas()+"   Puntos: "+juego.getPuntuacion(),184,14,CREMA);
+            if (e == Juego.Estado.VICTORIA || e == Juego.Estado.DERROTA) {
+                centrado(g, "Choques: " + juego.getEstadisticas().getChoquesClientes()
+                        + "   Entregas rechazadas: " + juego.getEstadisticas().getEntregasIncorrectas(), 199, 10, CREMA);
+                centrado(g, "API demo - " + juego.getEstadisticas().getMensajeEnvio(), 211, 10, CREMA);
+            }
             centrado(g,e==Juego.Estado.PAUSA?"P / ESC para continuar":e==Juego.Estado.DERROTA?"ENTER reintenta / R nueva":juego.isCampanaFinalizada()?"ENTER / R nueva campana":juego.haySiguienteNivel()?"ENTER: ir al nivel "+(juego.getNivelActual()+1)+" / R: nueva campana":"Pendiente / R nueva campana",236,14,CREMA);
             centrado(g,e==Juego.Estado.VICTORIA?(juego.haySiguienteNivel()?"Puntos conservados para el siguiente nivel.":juego.isCampanaFinalizada()?"Seis niveles superados.":"Faltan configuraciones del equipo."):e==Juego.Estado.PAUSA?"El reloj y los clientes estan detenidos.":"Prueba rutas cortas y evita los clientes.",286,12,CREMA);
         }

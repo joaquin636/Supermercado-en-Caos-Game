@@ -1,2 +1,139 @@
 <?xml version='1.0' encoding='utf-8'?>
-<mxfile><diagram name="Dominio"><mxGraphModel><root><mxCell id="0" /><mxCell id="1" parent="0" /><mxCell id="2" value="Juego&#10;- nivel: Nivel&#10;- puntuacion: int&#10;+ iniciarPartida()" style="rounded=0;whiteSpace=wrap;html=0;fillColor=#f2f4f1;" vertex="1" parent="1"><mxGeometry as="geometry" x="20" y="25" width="285" height="135" /></mxCell><mxCell id="3" value="Nivel&#10;- personajes: List&lt;Personaje&gt;&#10;- productos: List&lt;Producto&gt;&#10;+ actualizarPersonajes()" style="rounded=0;whiteSpace=wrap;html=0;fillColor=#f2f4f1;" vertex="1" parent="1"><mxGeometry as="geometry" x="340" y="25" width="285" height="135" /></mxCell><mxCell id="4" value="Personaje abstracta&#10;- x, y: double&#10;+ update(): abstract&#10;+ getBounds()" style="rounded=0;whiteSpace=wrap;html=0;fillColor=#f2f4f1;" vertex="1" parent="1"><mxGeometry as="geometry" x="660" y="25" width="285" height="135" /></mxCell><mxCell id="5" value="Producto&#10;- recogido, entregado: boolean&#10;+ marcarEntregado()" style="rounded=0;whiteSpace=wrap;html=0;fillColor=#f2f4f1;" vertex="1" parent="1"><mxGeometry as="geometry" x="20" y="260" width="285" height="135" /></mxCell><mxCell id="6" value="Estante&#10;- recibidos: List&lt;Producto&gt;&#10;+ recibirProducto(p)" style="rounded=0;whiteSpace=wrap;html=0;fillColor=#f2f4f1;" vertex="1" parent="1"><mxGeometry as="geometry" x="340" y="260" width="285" height="135" /></mxCell><mxCell id="7" value="Jugador&#10;- productoEnMano: Producto&#10;+ update()" style="rounded=0;whiteSpace=wrap;html=0;fillColor=#f2f4f1;" vertex="1" parent="1"><mxGeometry as="geometry" x="660" y="260" width="285" height="135" /></mxCell><mxCell id="8" value="Obstaculo&#10;- x, y: double&#10;+ getBounds()" style="rounded=0;whiteSpace=wrap;html=0;fillColor=#f2f4f1;" vertex="1" parent="1"><mxGeometry as="geometry" x="340" y="490" width="285" height="135" /></mxCell><mxCell id="9" value="Cliente&#10;+ update()&#10;+ cambiarDireccion()" style="rounded=0;whiteSpace=wrap;html=0;fillColor=#f2f4f1;" vertex="1" parent="1"><mxGeometry as="geometry" x="660" y="490" width="285" height="135" /></mxCell><mxCell id="e0" value="1" style="edgeStyle=orthogonalEdgeStyle;startArrow=diamond;endArrow=none;" edge="1" parent="1" source="2" target="3"><mxGeometry as="geometry" relative="1" /></mxCell><mxCell id="e1" value="personajes 1..*" style="edgeStyle=orthogonalEdgeStyle;startArrow=diamond;endArrow=none;" edge="1" parent="1" source="3" target="4"><mxGeometry as="geometry" relative="1" /></mxCell><mxCell id="e2" value="productos 6" style="edgeStyle=orthogonalEdgeStyle;startArrow=diamond;endArrow=none;" edge="1" parent="1" source="3" target="5"><mxGeometry as="geometry" relative="1" /></mxCell><mxCell id="e3" value="recibidos 0..*" style="edgeStyle=orthogonalEdgeStyle;startArrow=diamondThin;endArrow=none;" edge="1" parent="1" source="6" target="5"><mxGeometry as="geometry" relative="1" /></mxCell><mxCell id="e4" value="en mano 0..1" style="edgeStyle=orthogonalEdgeStyle;startArrow=none;endArrow=none;" edge="1" parent="1" source="7" target="5"><mxGeometry as="geometry" relative="1" /></mxCell><mxCell id="e5" value="" style="edgeStyle=orthogonalEdgeStyle;startArrow=none;endArrow=block;endFill=0;" edge="1" parent="1" source="7" target="4"><mxGeometry as="geometry" relative="1" /></mxCell><mxCell id="e6" value="" style="edgeStyle=orthogonalEdgeStyle;startArrow=none;endArrow=block;endFill=0;" edge="1" parent="1" source="9" target="4"><mxGeometry as="geometry" relative="1" /></mxCell><mxCell id="e7" value="" style="edgeStyle=orthogonalEdgeStyle;startArrow=none;endArrow=block;endFill=0;" edge="1" parent="1" source="6" target="8"><mxGeometry as="geometry" relative="1" /></mxCell><mxCell id="e8" value="obstaculos 1..*" style="edgeStyle=orthogonalEdgeStyle;startArrow=diamond;endArrow=none;" edge="1" parent="1" source="3" target="8"><mxGeometry as="geometry" relative="1" /></mxCell></root></mxGraphModel></diagram></mxfile>
+<mxfile host="app.diagrams.net">
+  <diagram name="Dominio">
+    <mxGraphModel dx="1220" dy="590" grid="1" page="1" pageWidth="1220" pageHeight="590">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="j" value="&lt;b&gt;Juego&lt;/b&gt;&lt;hr&gt;- estadoActual&lt;br&gt;- nivel, puntuacion&lt;br&gt;+ manejarTeclado()" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f1f4f2;strokeColor=#333333;fontSize=18;" vertex="1" parent="1">
+          <mxGeometry x="20" y="40" width="260" height="145" as="geometry" />
+        </mxCell>
+        <mxCell id="n" value="&lt;b&gt;Nivel&lt;/b&gt;&lt;hr&gt;- personajes, productos&lt;br&gt;- obstaculos, regla&lt;br&gt;+ actualizarPersonajes()" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f1f4f2;strokeColor=#333333;fontSize=18;" vertex="1" parent="1">
+          <mxGeometry x="320" y="40" width="260" height="145" as="geometry" />
+        </mxCell>
+        <mxCell id="p" value="&lt;b&gt;Personaje abstracta&lt;/b&gt;&lt;hr&gt;- x, y, velocidad&lt;br&gt;+ update() abstracto&lt;br&gt;+ getBounds()" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f1f4f2;strokeColor=#333333;fontSize=18;" vertex="1" parent="1">
+          <mxGeometry x="620" y="40" width="260" height="145" as="geometry" />
+        </mxCell>
+        <mxCell id="pr" value="&lt;b&gt;Producto&lt;/b&gt;&lt;hr&gt;- categoria, recogido&lt;br&gt;- entregado&lt;br&gt;+ soltar()" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f1f4f2;strokeColor=#333333;fontSize=18;" vertex="1" parent="1">
+          <mxGeometry x="920" y="40" width="280" height="145" as="geometry" />
+        </mxCell>
+        <mxCell id="o" value="&lt;b&gt;Obstaculo&lt;/b&gt;&lt;hr&gt;- x, y, ancho, alto&lt;br&gt;+ bloqueaPaso()&lt;br&gt;+ getBounds()" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f1f4f2;strokeColor=#333333;fontSize=18;" vertex="1" parent="1">
+          <mxGeometry x="20" y="340" width="260" height="145" as="geometry" />
+        </mxCell>
+        <mxCell id="e" value="&lt;b&gt;Estante&lt;/b&gt;&lt;hr&gt;- categoria, recibidos&lt;br&gt;+ recibirProducto()&lt;br&gt;+ aceptaProducto()" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f1f4f2;strokeColor=#333333;fontSize=18;" vertex="1" parent="1">
+          <mxGeometry x="320" y="340" width="260" height="145" as="geometry" />
+        </mxCell>
+        <mxCell id="ju" value="&lt;b&gt;Jugador&lt;/b&gt;&lt;hr&gt;- productoEnMano&lt;br&gt;+ update()&lt;br&gt;+ entregarProducto()" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f1f4f2;strokeColor=#333333;fontSize=18;" vertex="1" parent="1">
+          <mxGeometry x="620" y="340" width="260" height="145" as="geometry" />
+        </mxCell>
+        <mxCell id="c" value="&lt;b&gt;Cliente&lt;/b&gt;&lt;hr&gt;- movimiento, direccion&lt;br&gt;+ update()&lt;br&gt;+ cambiarDireccion()" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f1f4f2;strokeColor=#333333;fontSize=18;" vertex="1" parent="1">
+          <mxGeometry x="920" y="340" width="280" height="145" as="geometry" />
+        </mxCell>
+        <mxCell id="e0" value="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;startArrow=diamond;startFill=1;endArrow=none;" edge="1" parent="1" source="j" target="n">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e1" value="1..*" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;startArrow=diamond;startFill=1;endArrow=none;" edge="1" parent="1" source="n" target="p">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" value="productos 1..*" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;startArrow=diamond;startFill=1;endArrow=none;" edge="1" parent="1" source="n" target="pr">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" value="obstaculos 1..*" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;startArrow=diamond;startFill=1;endArrow=none;" edge="1" parent="1" source="n" target="o">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=0;" edge="1" parent="1" source="e" target="o">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=0;" edge="1" parent="1" source="ju" target="p">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e6" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=0;" edge="1" parent="1" source="c" target="p">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e7" value="en mano 0..1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=open;" edge="1" parent="1" source="ju" target="pr">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e8" value="recibidos 0..*" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;startArrow=diamond;startFill=0;endArrow=none;" edge="1" parent="1" source="e" target="pr">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram name="Patrones">
+    <mxGraphModel dx="1220" dy="1030" grid="1" page="1" pageWidth="1220" pageHeight="1030">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="b" value="&lt;b&gt;Builder&lt;/b&gt;&lt;hr&gt;+ tiempo(), producto()&lt;br&gt;+ construir()" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f1f4f2;strokeColor=#333333;fontSize=18;" vertex="1" parent="1">
+          <mxGeometry x="20" y="35" width="250" height="115" as="geometry" />
+        </mxCell>
+        <mxCell id="cfg" value="&lt;b&gt;ConfiguracionNivel&lt;/b&gt;&lt;hr&gt;receta validada&lt;br&gt;+ crearClientes()" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f1f4f2;strokeColor=#333333;fontSize=18;" vertex="1" parent="1">
+          <mxGeometry x="335" y="35" width="250" height="115" as="geometry" />
+        </mxCell>
+        <mxCell id="mc" value="&lt;b&gt;MovimientoCliente&lt;/b&gt;&lt;hr&gt;interfaz Strategy&lt;br&gt;+ calcular()" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f1f4f2;strokeColor=#333333;fontSize=18;" vertex="1" parent="1">
+          <mxGeometry x="640" y="35" width="250" height="115" as="geometry" />
+        </mxCell>
+        <mxCell id="pc" value="&lt;b&gt;PatrullaConPausas&lt;/b&gt;&lt;hr&gt;implementa calcular()&lt;br&gt;reloj en Cliente" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f1f4f2;strokeColor=#333333;fontSize=18;" vertex="1" parent="1">
+          <mxGeometry x="950" y="35" width="250" height="115" as="geometry" />
+        </mxCell>
+        <mxCell id="cli" value="&lt;b&gt;Cliente&lt;/b&gt;&lt;hr&gt;recibe una estrategia&lt;br&gt;+ update()" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f1f4f2;strokeColor=#333333;fontSize=18;" vertex="1" parent="1">
+          <mxGeometry x="640" y="260" width="250" height="115" as="geometry" />
+        </mxCell>
+        <mxCell id="ev" value="&lt;b&gt;Juego&lt;/b&gt;&lt;hr&gt;publica EventoJuego&lt;br&gt;+ agregarObservador()" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f1f4f2;strokeColor=#333333;fontSize=18;" vertex="1" parent="1">
+          <mxGeometry x="20" y="470" width="250" height="115" as="geometry" />
+        </mxCell>
+        <mxCell id="ob" value="&lt;b&gt;ObservadorJuego&lt;/b&gt;&lt;hr&gt;interfaz Observer&lt;br&gt;+ onEvento()" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f1f4f2;strokeColor=#333333;fontSize=18;" vertex="1" parent="1">
+          <mxGeometry x="335" y="470" width="250" height="115" as="geometry" />
+        </mxCell>
+        <mxCell id="reg" value="&lt;b&gt;RegistroEstadisticas&lt;/b&gt;&lt;hr&gt;implementa Observer&lt;br&gt;+ iniciarIntento()" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f1f4f2;strokeColor=#333333;fontSize=18;" vertex="1" parent="1">
+          <mxGeometry x="20" y="675" width="265" height="115" as="geometry" />
+        </mxCell>
+        <mxCell id="bu" value="&lt;b&gt;BuzonMensajesHud&lt;/b&gt;&lt;hr&gt;implementa Observer&lt;br&gt;avisos para GamePanel" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f1f4f2;strokeColor=#333333;fontSize=18;" vertex="1" parent="1">
+          <mxGeometry x="335" y="675" width="265" height="115" as="geometry" />
+        </mxCell>
+        <mxCell id="es" value="&lt;b&gt;EstadoJuego&lt;/b&gt;&lt;hr&gt;interfaz State&lt;br&gt;actualizar, teclado" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f1f4f2;strokeColor=#333333;fontSize=18;" vertex="1" parent="1">
+          <mxGeometry x="640" y="470" width="250" height="115" as="geometry" />
+        </mxCell>
+        <mxCell id="ej" value="&lt;b&gt;EstadoJugando&lt;/b&gt;&lt;hr&gt;implementa State&lt;br&gt;simulacion y acciones" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f1f4f2;strokeColor=#333333;fontSize=18;" vertex="1" parent="1">
+          <mxGeometry x="950" y="470" width="250" height="115" as="geometry" />
+        </mxCell>
+        <mxCell id="ep" value="&lt;b&gt;EstadoPausa&lt;/b&gt;&lt;hr&gt;implementa State&lt;br&gt;solo reanudar" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f1f4f2;strokeColor=#333333;fontSize=18;" vertex="1" parent="1">
+          <mxGeometry x="950" y="675" width="250" height="115" as="geometry" />
+        </mxCell>
+        <mxCell id="api" value="&lt;b&gt;APIClient&lt;/b&gt;&lt;hr&gt;+ subirEstadisticasAsync()&lt;br&gt;HttpClient.sendAsync" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f1f4f2;strokeColor=#333333;fontSize=18;" vertex="1" parent="1">
+          <mxGeometry x="20" y="890" width="265" height="115" as="geometry" />
+        </mxCell>
+        <mxCell id="e0" value="construye" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=open;dashed=1;" edge="1" parent="1" source="b" target="cfg">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e1" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=0;dashed=1;" edge="1" parent="1" source="pc" target="mc">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" value="estrategia" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=open;" edge="1" parent="1" source="cli" target="mc">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" value="observadores" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;startArrow=diamond;startFill=0;endArrow=none;" edge="1" parent="1" source="ev" target="ob">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=0;dashed=1;" edge="1" parent="1" source="reg" target="ob">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=0;dashed=1;" edge="1" parent="1" source="bu" target="ob">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e6" value="estado activo" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=open;" edge="1" parent="1" source="ev" target="es">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e7" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=0;dashed=1;" edge="1" parent="1" source="ej" target="es">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e8" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=0;dashed=1;" edge="1" parent="1" source="ep" target="es">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e9" value="envio asincrono" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=open;" edge="1" parent="1" source="reg" target="api">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

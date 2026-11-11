@@ -9,7 +9,7 @@ import com.supermercado.obstacles.*;
 import com.supermercado.ui.GamePanel;
 import com.supermercado.ui.GameWindow;
 import java.awt.event.*;
-import java.util.List;
+
 import javax.swing.*;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
@@ -102,7 +102,7 @@ public final class PruebasJuan {
         nuevo.update();
         verificar(nuevo.getDesplazamientoX() > 0, "Recarga reinicia ciclo de marcha y pausa");
 
-        Juego juego = new Juego(new CatalogoNiveles(java.util.List.of(configuracion)));
+        Juego juego = PartidasPrueba.crear(new CatalogoNiveles(java.util.List.of(configuracion)));
         juego.iniciarPartida();
         for (int i = 0; i < 120; i++) juego.actualizar();
         Cliente pausado = (Cliente) juego.getNivel().getPersonajes().get(1);
@@ -126,7 +126,7 @@ public final class PruebasJuan {
                 .producto("Manzana", Producto.FRUTAS, 100, 220)
                 .producto("Leche", Producto.LACTEOS, 440, 270)
                 .producto("Platano", Producto.FRUTAS, 400, 400).construir();
-        Juego j = new Juego(new CatalogoNiveles(List.of(c)));
+        Juego j = PartidasPrueba.crear(new CatalogoNiveles(List.of(c)));
         j.iniciarPartida();
         return j;
     }
@@ -213,7 +213,7 @@ public final class PruebasJuan {
     }
 
     private static Juego entrarNivelDos() {
-        Juego j = new Juego(); j.iniciarPartida();
+        Juego j = PartidasPrueba.crear(); j.iniciarPartida();
         // Solo prepara el acceso por victoria normal; el recorrido del nivel 2 no teletransporta.
         for (Producto p : j.getNivel().getProductos()) entregar(j, p);
         verificar(j.avanzarNivel() && j.getNivelActual() == 2, "Nivel 2 accesible tras victoria del primero");
@@ -255,9 +255,9 @@ public final class PruebasJuan {
         }
         verificar(j.getEstado() == Juego.Estado.VICTORIA && j.getPuntuacion() == 1200,
                 "Gana nivel 2 con 600 puntos propios y conserva 600 del primero");
-        verificar(!j.isCampanaFinalizada() && !j.avanzarNivel(), "Nivel 3 sigue pendiente; no inventa final de campana");
         System.out.printf("Nivel 2 recorrido a velocidad real: 6/6, %.1f segundos restantes.%n", j.getTiempoRestante());
         capturar(j, "juan-nivel2-victoria.png");
+        verificar(!j.isCampanaFinalizada() && j.avanzarNivel() && j.getNivelActual() == 3, "El juego avanza con exito al Nivel 3 creado por Aldayer");
 
         // La demo de orden se puede inspeccionar sin editar el catalogo del producto.
         Juego demo = juegoObjetivo(true);
@@ -278,7 +278,7 @@ public final class PruebasJuan {
     }
 
     /** BFS solo planea rutas estaticas. Cada arista se ejecuta mediante direccion y ticks del Juego. */
-    private static void caminar(Juego juego, Rectangle2D objetivo) {
+    static void caminar(Juego juego, Rectangle2D objetivo) {
         Nivel nivel = juego.getNivel(); Jugador jugador = nivel.getJugador();
         final int celda = 7;
         double origenX = jugador.getX() % celda, origenY = jugador.getY() % celda;
@@ -307,7 +307,7 @@ public final class PruebasJuan {
                 if (libre) { anteriores[siguiente] = actual; cola.add(siguiente); }
             }
         }
-        verificar(fin != -1, "Existe ruta accesible a objetivo del nivel 2");
+        verificar(fin != -1, "Existe ruta accesible a objetivo del nivel " + nivel.getNumero());
         List<Integer> ruta = new ArrayList<>();
         for (int v = fin; v != inicio; v = anteriores[v]) ruta.add(v);
         Collections.reverse(ruta);
@@ -322,7 +322,7 @@ public final class PruebasJuan {
         juego.setDireccion(0, 0);
     }
 
-    private static void capturar(Juego juego, String nombre) throws Exception {
+    static void capturar(Juego juego, String nombre) throws Exception {
         capturar(juego, nombre, 1280, 800);
     }
 

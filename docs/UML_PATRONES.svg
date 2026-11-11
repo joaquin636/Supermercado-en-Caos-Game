@@ -1,0 +1,90 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1220" height="1030" viewBox="0 0 1220 1030">
+<defs><marker id="open" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#333"/></marker><marker id="tri" markerWidth="12" markerHeight="12" refX="11" refY="6" orient="auto"><path d="M1 1 L11 6 L1 11 Z" fill="white" stroke="#333"/></marker><marker id="comp" markerWidth="12" markerHeight="10" refX="1" refY="5" orient="auto"><path d="M1 5 L6 1 L11 5 L6 9 Z" fill="#333" stroke="#333"/></marker><marker id="agg" markerWidth="12" markerHeight="10" refX="1" refY="5" orient="auto"><path d="M1 5 L6 1 L11 5 L6 9 Z" fill="white" stroke="#333"/></marker></defs>
+<rect width="1220" height="1030" fill="white"/>
+<g font-family="Arial, sans-serif" fill="#161616">
+<rect x="20" y="35" width="250" height="115" fill="#f1f4f2" stroke="#333" stroke-width="2"/>
+<text x="145.0" y="64" text-anchor="middle" font-size="21" font-weight="bold">Builder</text>
+<path d="M20 77 H270" stroke="#333"/>
+<text x="32" y="103" font-size="17">+ tiempo(), producto()</text>
+<text x="32" y="127" font-size="17">+ construir()</text>
+<rect x="335" y="35" width="250" height="115" fill="#f1f4f2" stroke="#333" stroke-width="2"/>
+<text x="460.0" y="64" text-anchor="middle" font-size="21" font-weight="bold">ConfiguracionNivel</text>
+<path d="M335 77 H585" stroke="#333"/>
+<text x="347" y="103" font-size="17">receta validada</text>
+<text x="347" y="127" font-size="17">+ crearClientes()</text>
+<rect x="640" y="35" width="250" height="115" fill="#f1f4f2" stroke="#333" stroke-width="2"/>
+<text x="765.0" y="64" text-anchor="middle" font-size="21" font-weight="bold">MovimientoCliente</text>
+<path d="M640 77 H890" stroke="#333"/>
+<text x="652" y="103" font-size="17">interfaz Strategy</text>
+<text x="652" y="127" font-size="17">+ calcular()</text>
+<rect x="950" y="35" width="250" height="115" fill="#f1f4f2" stroke="#333" stroke-width="2"/>
+<text x="1075.0" y="64" text-anchor="middle" font-size="21" font-weight="bold">PatrullaConPausas</text>
+<path d="M950 77 H1200" stroke="#333"/>
+<text x="962" y="103" font-size="17">implementa calcular()</text>
+<text x="962" y="127" font-size="17">reloj en Cliente</text>
+<rect x="640" y="260" width="250" height="115" fill="#f1f4f2" stroke="#333" stroke-width="2"/>
+<text x="765.0" y="289" text-anchor="middle" font-size="21" font-weight="bold">Cliente</text>
+<path d="M640 302 H890" stroke="#333"/>
+<text x="652" y="328" font-size="17">recibe una estrategia</text>
+<text x="652" y="352" font-size="17">+ update()</text>
+<rect x="20" y="470" width="250" height="115" fill="#f1f4f2" stroke="#333" stroke-width="2"/>
+<text x="145.0" y="499" text-anchor="middle" font-size="21" font-weight="bold">Juego</text>
+<path d="M20 512 H270" stroke="#333"/>
+<text x="32" y="538" font-size="17">publica EventoJuego</text>
+<text x="32" y="562" font-size="17">+ agregarObservador()</text>
+<rect x="335" y="470" width="250" height="115" fill="#f1f4f2" stroke="#333" stroke-width="2"/>
+<text x="460.0" y="499" text-anchor="middle" font-size="21" font-weight="bold">ObservadorJuego</text>
+<path d="M335 512 H585" stroke="#333"/>
+<text x="347" y="538" font-size="17">interfaz Observer</text>
+<text x="347" y="562" font-size="17">+ onEvento()</text>
+<rect x="20" y="675" width="265" height="115" fill="#f1f4f2" stroke="#333" stroke-width="2"/>
+<text x="152.5" y="704" text-anchor="middle" font-size="21" font-weight="bold">RegistroEstadisticas</text>
+<path d="M20 717 H285" stroke="#333"/>
+<text x="32" y="743" font-size="17">implementa Observer</text>
+<text x="32" y="767" font-size="17">+ iniciarIntento()</text>
+<rect x="335" y="675" width="265" height="115" fill="#f1f4f2" stroke="#333" stroke-width="2"/>
+<text x="467.5" y="704" text-anchor="middle" font-size="21" font-weight="bold">BuzonMensajesHud</text>
+<path d="M335 717 H600" stroke="#333"/>
+<text x="347" y="743" font-size="17">implementa Observer</text>
+<text x="347" y="767" font-size="17">avisos para GamePanel</text>
+<rect x="640" y="470" width="250" height="115" fill="#f1f4f2" stroke="#333" stroke-width="2"/>
+<text x="765.0" y="499" text-anchor="middle" font-size="21" font-weight="bold">EstadoJuego</text>
+<path d="M640 512 H890" stroke="#333"/>
+<text x="652" y="538" font-size="17">interfaz State</text>
+<text x="652" y="562" font-size="17">actualizar, teclado</text>
+<rect x="950" y="470" width="250" height="115" fill="#f1f4f2" stroke="#333" stroke-width="2"/>
+<text x="1075.0" y="499" text-anchor="middle" font-size="21" font-weight="bold">EstadoJugando</text>
+<path d="M950 512 H1200" stroke="#333"/>
+<text x="962" y="538" font-size="17">implementa State</text>
+<text x="962" y="562" font-size="17">simulacion y acciones</text>
+<rect x="950" y="675" width="250" height="115" fill="#f1f4f2" stroke="#333" stroke-width="2"/>
+<text x="1075.0" y="704" text-anchor="middle" font-size="21" font-weight="bold">EstadoPausa</text>
+<path d="M950 717 H1200" stroke="#333"/>
+<text x="962" y="743" font-size="17">implementa State</text>
+<text x="962" y="767" font-size="17">solo reanudar</text>
+<rect x="20" y="890" width="265" height="115" fill="#f1f4f2" stroke="#333" stroke-width="2"/>
+<text x="152.5" y="919" text-anchor="middle" font-size="21" font-weight="bold">APIClient</text>
+<path d="M20 932 H285" stroke="#333"/>
+<text x="32" y="958" font-size="17">+ subirEstadisticasAsync()</text>
+<text x="32" y="982" font-size="17">HttpClient.sendAsync</text>
+<polyline points="270,95 335,95" fill="none" stroke="#333" stroke-width="2" marker-end="url(#open)" stroke-dasharray="7 5"/>
+<rect x="261.4" y="3" width="83.2" height="25" fill="white"/>
+<text x="303.0" y="22" text-anchor="middle" font-size="18">construye</text>
+<polyline points="950,95 890,95" fill="none" stroke="#333" stroke-width="2" marker-end="url(#tri)" stroke-dasharray="7 5"/>
+<polyline points="765,260 765,150" fill="none" stroke="#333" stroke-width="2" marker-end="url(#open)"/>
+<rect x="732.0" y="206.0" width="92.0" height="25" fill="white"/>
+<text x="778.0" y="225.0" text-anchor="middle" font-size="18">estrategia</text>
+<polyline points="270,530 335,530" fill="none" stroke="#333" stroke-width="2" marker-start="url(#agg)"/>
+<rect x="248.2" y="601" width="109.60000000000001" height="25" fill="white"/>
+<text x="303.0" y="620" text-anchor="middle" font-size="18">observadores</text>
+<polyline points="280,675 430,585" fill="none" stroke="#333" stroke-width="2" marker-end="url(#tri)" stroke-dasharray="7 5"/>
+<polyline points="465,675 465,585" fill="none" stroke="#333" stroke-width="2" marker-end="url(#tri)" stroke-dasharray="7 5"/>
+<polyline points="150,470 150,420 765,420 765,470" fill="none" stroke="#333" stroke-width="2" marker-end="url(#open)"/>
+<rect x="390.8" y="391.0" width="118.4" height="25" fill="white"/>
+<text x="450.0" y="410.0" text-anchor="middle" font-size="18">estado activo</text>
+<polyline points="950,530 890,530" fill="none" stroke="#333" stroke-width="2" marker-end="url(#tri)" stroke-dasharray="7 5"/>
+<polyline points="950,725 765,725 765,585" fill="none" stroke="#333" stroke-width="2" marker-end="url(#tri)" stroke-dasharray="7 5"/>
+<polyline points="150,790 150,890" fill="none" stroke="#333" stroke-width="2" marker-end="url(#open)"/>
+<rect x="102.0" y="831.0" width="136.0" height="25" fill="white"/>
+<text x="170.0" y="850.0" text-anchor="middle" font-size="18">envio asincrono</text>
+</g></svg>

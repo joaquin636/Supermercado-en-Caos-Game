@@ -1,3 +1,9 @@
+test/com/supermercado/PartidasPrueba.java
+test/com/supermercado/PruebasAldayer.java
 test/com/supermercado/PruebasCampana.java
-test/com/supermercado/PruebasJuego.java
+test/com/supermercado/PruebasEstados.java
+test/com/supermercado/PruebasHttp.java
+test/com/supermercado/PruebasIntegracion.java
 test/com/supermercado/PruebasJuan.java
+test/com/supermercado/PruebasJuego.java
+test/com/supermercado/VerificarApi.java
