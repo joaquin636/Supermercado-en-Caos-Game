@@ -7,13 +7,15 @@ import java.awt.Graphics2D;
 import java.awt.event.KeyEvent;
 
 public class EstadoResultado implements EstadoJuego {
-    private Juego juego;
-    private boolean victoria;
+    private final Juego juego;
+    private final boolean victoria;
 
     public EstadoResultado(Juego juego, boolean victoria) {
         this.juego = juego;
         this.victoria = victoria;
     }
+
+    public boolean isVictoria() { return victoria; }
 
     @Override
     public void actualizar() {

@@ -22,9 +22,6 @@ public final class Juego {
     // Estado activo mediante el Patrón State
     private EstadoJuego estadoActual;
     
-    // Bandera auxiliar para saber si la última pantalla de resultado fue victoria o derrota
-    private boolean ultimoResultadoVictoria;
-
     private String mensaje = "Organiza los seis productos antes de que termine el tiempo.";
     private double duracionMensaje;
 
@@ -39,7 +36,7 @@ public final class Juego {
     }
 
     public void cambiarEstado(EstadoJuego nuevoEstado) {
-        this.estadoActual = nuevoEstado;
+        this.estadoActual = java.util.Objects.requireNonNull(nuevoEstado);
     }
 
     public EstadoJuego getEstadoActual() {
@@ -58,7 +55,7 @@ public final class Juego {
 
     /** Consume una victoria una sola vez; si falta la configuracion conserva el resultado. */
     public boolean avanzarNivel() {
-        if (!(estadoActual instanceof EstadoResultado) || campanaFinalizada) return false;
+        if (!(estadoActual instanceof EstadoResultado resultado) || !resultado.isVictoria() || campanaFinalizada) return false;
         int siguiente = getNivelActual() + 1;
         if (!catalogo.contiene(siguiente)) {
             avisar("Nivel " + siguiente + " pendiente de integracion. R: nueva campana."); 
@@ -69,7 +66,7 @@ public final class Juego {
     }
 
     public boolean reintentarNivel() {
-        if (!(estadoActual instanceof EstadoResultado)) return false;
+        if (!(estadoActual instanceof EstadoResultado resultado) || resultado.isVictoria()) return false;
         int numero = getNivelActual();
         puntuacion = puntuacionInicioNivel; 
         cargarNivel(numero); 
@@ -118,6 +115,7 @@ public final class Juego {
     }
 
     public void interactuar() {
+        if (!(estadoActual instanceof EstadoJugando)) return;
         Jugador j = nivel.getJugador();
         Producto enMano = j.getProductoEnMano();
         if (enMano == null) {
@@ -144,7 +142,6 @@ public final class Juego {
                     if (campanaFinalizada) {
                         cambiarEstado(new EstadoFinalCampana(this));
                     } else {
-                        ultimoResultadoVictoria = true;
                         cambiarEstado(new EstadoResultado(this, true));
                     }
                 }
@@ -174,33 +171,21 @@ public final class Juego {
         if (estadoActual instanceof EstadoJugando) alternarPausa(); 
     }
 
-    // Sobrecarga sin parámetros para mantener compatibilidad con las pruebas unitarias
     public void terminarPartida() {
-        // Si ya estamos en estado de victoria, final de campaña, o el último resultado fue victoria, protegemos el estado
-        if (estadoActual instanceof EstadoResultado && ultimoResultadoVictoria) return;
-        if (estadoActual instanceof EstadoFinalCampana) return;
-        
         terminarPartida(false);
     }
 
     public void terminarPartida(boolean victoria) {
+        if (!(estadoActual instanceof EstadoJugando) && !(estadoActual instanceof EstadoPausa)) return;
+        nivel.getJugador().setDireccion(0, 0);
         if (victoria) {
             campanaFinalizada = getNivelActual() == CatalogoNiveles.ULTIMO_NIVEL;
-            ultimoResultadoVictoria = true;
             if (campanaFinalizada) {
                 cambiarEstado(new EstadoFinalCampana(this));
-            } else {
-                cambiarEstado(new EstadoResultado(this, true));
-            }
-        } else {
-            // Si ya habíamos ganado, una derrota posterior por error de hilo o reloj no debe sobrescribir la victoria
-            if (ultimoResultadoVictoria && (estadoActual instanceof EstadoResultado || estadoActual instanceof EstadoFinalCampana)) {
                 return;
             }
-            nivel.getJugador().setDireccion(0, 0);
-            ultimoResultadoVictoria = false;
-            cambiarEstado(new EstadoResultado(this, false));
         }
+        cambiarEstado(new EstadoResultado(this, victoria));
     }
 
     private void avisar(String texto) { mensaje = texto; duracionMensaje = 4.5; }
@@ -211,8 +196,8 @@ public final class Juego {
         if (estadoActual instanceof EstadoMenu) return Estado.MENU;
         if (estadoActual instanceof EstadoJugando) return Estado.JUGANDO;
         if (estadoActual instanceof EstadoPausa) return Estado.PAUSA;
-        if (estadoActual instanceof EstadoResultado) {
-            return ultimoResultadoVictoria ? Estado.VICTORIA : Estado.DERROTA;
+        if (estadoActual instanceof EstadoResultado resultado) {
+            return resultado.isVictoria() ? Estado.VICTORIA : Estado.DERROTA;
         }
         if (estadoActual instanceof EstadoFinalCampana) return Estado.VICTORIA;
         return Estado.JUGANDO;
@@ -224,6 +209,12 @@ public final class Juego {
     public double getTiempoRestante() { return tiempoRestante; }
     
     public String getMensaje() {
+        if (getEstado() == Estado.VICTORIA) {
+            if (campanaFinalizada) return "Campana completada: seis niveles superados. R / ENTER: nueva campana.";
+            return haySiguienteNivel() ? "Nivel superado. ENTER: siguiente nivel. R: nueva campana."
+                    : "Nivel " + (getNivelActual() + 1) + " pendiente de integracion. R: nueva campana.";
+        }
+        if (getEstado() == Estado.DERROTA) return "ENTER: reintentar nivel. R: nueva campana. Se descartan los puntos del intento fallido.";
         return duracionMensaje > 0 ? mensaje : getAyudaContextual();
     }
 
