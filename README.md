@@ -1,119 +1,126 @@
 # Supermercado en Caos
 
-**Supermercado en Caos** es un videojuego cenital 2D desarrollado en Java (versión 17+, Swing / Java2D) sin dependencias ni bibliotecas externas. Proyecto desarrollado para el curso de Programación Orientada a Objetos (POO) de la Universidad Peruana Cayetano Heredia.
+Juego cenital de reposición de productos desarrollado en Java 17+, Swing y Java2D. El repositor recoge un producto, lo lleva a su sección y evita clientes mientras completa una campaña de seis niveles. Mercado La Esquina conserva su pixel art original, su paleta cálida y sus marcos dorados.
 
-El nivel 1 conserva sus seis entregas y dispone de 180 segundos (3 minutos). El nivel 2, **Pasillo concurrido**, tiene seis entregas libres, 135 segundos y cuatro clientes con dos comportamientos (Strategy): patrulla continua y patrulla con pausas. Incluye patrullas horizontales y verticales, y los estantes estan distribuidos entre la parte superior, derecha e inferior del mapa. La campaña conserva puntos y permite reintentar. Los niveles 3–6 y la integracion de State y Observer siguen pendientes del equipo. Los cambios U1, U2 y U3 se explican en [docs/GUIA_JUAN.md](docs/GUIA_JUAN.md).
+## Ejecutar
 
-![Partida](docs/capturas/02_partida.png)
+Se necesita un JDK 17 o superior para compilar desde fuentes. Si Java no está disponible en PATH, configura JAVA_HOME con la carpeta de tu JDK.
 
----
+En Windows abre esta carpeta y ejecuta:
 
-## 🚀 Ejecución y Compilación
+~~~powershell
+.\ejecutar.bat
+~~~
 
-1. **Ejecutar JAR:**
-   * Extraer todo el ZIP.
-   * Con Java 17 o superior instalado, ejecutar:
-     ```bash
-     java -jar dist/SupermercadoEnCaos.jar
-     ```
-2. **Compilar desde código fuente:**
-   * **Windows:** Ejecutar `ejecutar.bat` (requiere JDK 17+).
-   * **Linux / macOS:** Ejecutar `bash ejecutar.sh` (requiere JDK 17+).
-   * Si el comando `java` del sistema falla, asegúrate de configurar la variable `JAVA_HOME` apuntando a tu JDK.
-   * **Entorno IDE:** En IntelliJ (o similares), abrir esta carpeta raíz y ejecutar la clase principal `com.supermercado.Main`.
+En Linux o macOS:
 
----
+~~~bash
+bash ejecutar.sh
+~~~
 
-## 🎮 Controles y Dinámica de Juego
+La clase principal del IDE es com.supermercado.Main. Los scripts compilan las clases incluidas en sources.txt con --release 17 y codificación UTF-8.
 
-* **Navegación en Menús:** Teclas `Arriba` / `Abajo` o `W` / `S`. Presionar `Enter` para seleccionar *Jugar/Iniciar*, *Instrucciones* o *Salir*.
-* **Movimiento del Personaje:** Teclas `WASD` o `Flechas direccionales`.
-* **Interacción (`E`):** Presionar la tecla `E` estando cerca de un objeto para recogerlo del suelo o entregarlo en su estante.
-* **Dejar producto (`Q`):** Deja lo transportado en la posicion actual y libera la mano. Permite corregir una recogida fuera de turno.
-* **Pausa (`P` / `ESC`):** Pausa o reanuda la partida. Cambiar el foco de la ventana pausa el juego automáticamente y limpia las teclas presionadas.
-* **Victoria (`Enter`):** Avanza al siguiente nivel disponible; si falta su configuración, conserva el resultado y lo indica.
-* **Derrota (`Enter`):** Reintenta el nivel actual y restaura la puntuación anterior al intento.
-* **Nueva campaña (`R`):** Desde victoria o derrota, vuelve al nivel 1 con cero puntos. Tras completar el nivel 6, `Enter` también inicia una campaña nueva.
+El paquete ejecutable final se inicia con:
 
----
+~~~bash
+java -jar dist/SupermercadoEnCaos.jar
+~~~
 
-## 🎯 Objetivo y Reglas de Juego
+Consulta docs/VALIDACION_FINAL.md para identificar el commit, el entorno y las verificaciones correspondientes al JAR de esta candidata.
 
-* **Transporte:** El repositor solo puede llevar un producto a la vez.
-* **Entregas ordenadas:** Cuando la configuracion lo requiere, las categorias de la lista definen la secuencia. La HUD muestra `SIGUE`. Una entrega fuera de turno conserva el producto y no da puntos. Se puede dejar con Q; los productos de la misma categoria son intercambiables.
-* **Puntuación:** Cada entrega realizada en la categoría correcta otorga **+100 puntos**.
-* **Obstáculos:** Las cajas y los estantes actúan como objetos sólidos que bloquean el paso.
-* **Clientes:** Los clientes patrullan por la tienda. Al chocar con ellos, se aplican **-5 segundos** de penalización al reloj, otorgando **1 segundo de inmunidad temporal** tras el contacto.
-* **Condición de Victoria:** Se cumple el objetivo de la configuración actual antes de que expire el tiempo: seis entregas libres en los niveles 1 y 2. Cada entrega suma 100 puntos; los puntos de intentos fallidos se descartan al reintentar. La campaña termina únicamente al completar el nivel 6, cuando sus configuraciones estén integradas. Los niveles ordenados se habilitan mediante `entregasEnOrden(true)`; se incluye una demostracion aislada para probar esa regla sin modificar la campaña.
-* **Condición de Derrota:** Se pierde automáticamente si el temporizador llega a 00:00.
+## Controles
 
----
+| Acción | Tecla |
+| --- | --- |
+| Elegir una opción de menú | Arriba / abajo o W / S |
+| Aceptar opción, avanzar tras victoria o reintentar tras derrota | Enter |
+| Mover al repositor | WASD o flechas |
+| Recoger o entregar cerca del objeto | E |
+| Dejar el producto transportado en el suelo | Q |
+| Pausar o reanudar | P o Esc |
+| Iniciar otra campaña desde un resultado | R |
 
-## 📦 Productos y Categorías
+El menú incluye Jugar/Iniciar, Instrucciones y Salir. Al perder el foco, la ventana pausa el juego y limpia las teclas mantenidas. En pausa se conservan reloj, posiciones y producto transportado.
 
-El juego cuenta con 6 productos repartidos en 3 categorías bien definidas:
+## Objetivo y campaña
 
-| Categoría | Productos Incluidos |
-| :--- | :--- |
-| **Frutas** | Manzana, Plátano |
-| **Lácteos** | Leche, Yogur |
-| **Limpieza** | Detergente, Jabón |
+Cada entrega aceptada suma 100 puntos. Un choque con un cliente descuenta cinco segundos y concede un segundo de protección. Las cajas y estantes bloquean el paso. El repositor transporta un producto a la vez.
 
----
+Una entrega fuera de categoría o de turno conserva el producto y la puntuación. Q permite dejarlo para buscar el que corresponde. Los productos de una misma categoría son intercambiables cuando la regla exige esa categoría.
 
-## 🚧 Obstáculos y Personajes
+| Nivel | Nombre | Tiempo inicial | Regla y desafío |
+| --- | --- | ---: | --- |
+| 1 | Turno de reposición | 180 s | Seis entregas libres y patrullas horizontales |
+| 2 | Pasillo concurrido | 135 s | Estantes repartidos, corredores y cuatro clientes con marcha continua o pausada |
+| 3 | Rutas cruzadas | 165 s | Recorridos entre cajas y patrullas en ambos ejes |
+| 4 | Reposición por secciones | 180 s | Frutas, lácteos y limpieza, dos veces en ese orden |
+| 5 | Cruce de reposición | 155 s | Entregas libres entre dos corredores con cinco patrullas y ciclos de pausa distintos |
+| 6 | Último turno | 100 s | Lácteos, frutas y limpieza, dos veces, con seis clientes y pasillos más estrechos |
 
-* **El Repositor (Jugador):** Personaje principal controlado por el jugador. Solo puede cargar un producto a la vez.
-* **Clientes:** Personajes secundarios que patrullan la tienda de forma autónoma. Al colisionar con ellos, penalizan el tiempo restante.
-* **Cajas y Estantes:** Obstáculos sólidos que bloquean el paso y delimitan los pasillos.
-* *(En desarrollo para la versión final: Supervisores, derrames en el piso y carritos descontrolados)*.
+Los tiempos de los niveles nuevos son valores iniciales de balance. Se deben contrastar con partidas humanas del equipo. El recorrido automático permite comprobar accesibilidad y reloj.
 
----
+Enter conserva los puntos al avanzar. Si se pierde, el reintento reconstruye ese nivel y restaura la puntuación de entrada. Ganar el sexto finaliza la campaña. Enter o R desde ese final inicia otra campaña con cero puntos.
 
-## 🎨 Arte y Alcance Visual
+## Arquitectura y patrones
 
-* **Gráficos Originales:** Estilo pixel art original dibujado mediante Java2D (baldosas, mobiliario, productos y personajes) con una paleta limitada y coherente.
-* **Efectos Visuales:** Animación de pasos, orientación vertical, flotación de productos e indicadores de parpadeo para la inmunidad.
-* **Atlas de Texturas:** El archivo `atlas PNG` ubicado en la carpeta `assets` documenta las formas originales. Sin embargo, el juego drena y dibuja directamente desde código, por lo que no requiere archivos externos durante la ejecución.
-* **Alcance:** Sin audio. Nivel 1 original y nivel 2 Pasillo concurrido. No hay configuraciones de producto para niveles 3–6. El tiempo de 135 segundos es un valor inicial que el equipo debe ajustar jugando. Las letras monoespaciadas, los paneles dorados, las bandas de cada estante y las baldosas cálidas se dibujan en una escena de 640 × 400. El escalado por vecino más cercano conserva los bordes de los píxeles.
+Juego coordina el modelo y delega actualización y comandos en EstadoJuego. GamePanel conserva presentación, menú y selección de opciones. ControlTeclado procesa pulsaciones y teclas mantenidas. Nivel crea las entidades y resuelve movimiento, colisiones y proximidad.
 
----
+- Builder construye configuraciones validadas e independientes mediante ConfiguracionNivel.Builder.
+- Strategy permite intercambiar MovimientoCliente y ReglaEntregas sin duplicar colisiones o puntuación.
+- Observer conecta los eventos del modelo con el HUD y RegistroEstadisticas.
+- State determina las acciones admitidas en menú, partida, pausa y resultados.
 
-## 🏛️ Arquitectura y Cumplimiento de Rúbrica
+Los ejemplos, las relaciones UML y la defensa técnica se desarrollan en docs/ARQUITECTURA.md y docs/GUIA_EXPOSICION.md.
 
-* **Estructura:** Modelo, entrada y presentación separados; `ConfiguracionNivel` y `CatalogoNiveles` definen escenarios sin duplicar movimiento ni colisiones.
-* **Documentación:** Ver detalles técnicos en `docs/ARQUITECTURA.md`, `docs/UML.svg` y `docs/UML.drawio`.
-* **Detalles Técnicos:** El `enum` de manejo de pantallas se utiliza exclusivamente para la selección de vistas y no se presenta como un patrón de diseño State.
-* **Cambios e integración:** Consultar [docs/GUIA_JUAN.md](docs/GUIA_JUAN.md). Strategy esta implementado para el movimiento de clientes. Esta rama no implementa State ni Observer.
+## Estadísticas y API
 
----
+Al finalizar un intento, RegistroEstadisticas toma sus entregas, errores, choques, puntos y resultado. APIClient realiza el POST asíncrono mediante java.net.http.HttpClient. El juego permanece operativo durante la espera. El resultado del envío aparece en la pantalla de resultado y se describen errores HTTP, desconexión y timeout.
 
-## 🧪 Verificación y Pruebas Automatizadas
+El proveedor configurado es JSONPlaceholder. Su POST simula la creación del recurso y no ofrece almacenamiento permanente de las estadísticas. El mensaje de éxito indica que la API aceptó la petición de demostración. La demostración académica debe identificar el servicio y su alcance. [Guía oficial de JSONPlaceholder](https://jsonplaceholder.typicode.com/guide/)
 
-* **Ejecutar Pruebas:** Ejecuta `probar.bat` (Windows) o `bash probar.sh` (Linux/macOS) para compilar y correr la suite de pruebas sin librerías externas.
-* **Cobertura de Pruebas:** Las pruebas automáticas evalúan el movimiento, colisiones, transporte, entregas en categorías incorrectas, victoria, derrota, pausa, inmunidad, respuesta de controles y navegación hacia las instrucciones. Además, generan capturas directas del panel Swing en `build/capturas-pruebas/`, nunca dentro de `docs/`. La suite adicional verifica configuración, campaña, puntuación, reintentos y finalización con fixtures de seis etapas exclusivas de pruebas.
-* **Nota sobre la ruta automatizada:** El recorrido automático utiliza el resolvedor real de colisiones del modelo y pasos de actualización entre segmentos; no simula todas las pulsaciones físicas de un jugador humano.
+## Pruebas
 
-## Demostracion aislada de entregas ordenadas
+En Windows ejecuta:
 
-Despues de `probar.bat` o `bash probar.sh`, ejecutar desde la raiz:
+~~~powershell
+.\probar.bat
+~~~
 
-```text
-java -cp build/classes com.supermercado.PruebasJuan --demo-orden
-```
+En Linux o macOS:
 
-Tambien se puede ejecutar esa clase desde IntelliJ con el argumento `--demo-orden`.
-Abre una configuracion de prueba de tres productos con secuencia FRUTAS, LACTEOS, FRUTAS.
-Recoger Leche primero permite probar el rechazo en LACTEOS y la recuperacion con Q.
-Es una demostracion de U2, no un tercer nivel de campaña; no se incluye en el JAR de produccion.
+~~~bash
+bash probar.sh
+~~~
 
-## Probar directamente el nivel 2
+La suite compila sources.txt y tests.txt y ejecuta com.supermercado.PruebasJuego. Comprueba contratos del modelo, controles Swing, pausa, resultados, entrega libre y ordenada, seis niveles y conexión entre los patrones. La red se comprueba con un servidor HTTP local controlado, con casos de aceptación, error, lentitud y desconexión. Su ejecución requiere permiso para utilizar sockets de la propia computadora.
 
-Despues de compilar las pruebas se puede ejecutar:
+Las capturas se generan bajo build/capturas-pruebas. Las fixtures de campaña permiten probar configuraciones pequeñas de forma aislada. El recorrido de la campaña real utiliza la dirección del jugador y actualizaciones del juego, con colisiones y reloj activos.
 
-```text
-java -cp build/classes com.supermercado.PruebasJuan --demo-nivel2
-```
+La prueba automatizada de interfaz ejecuta los mapas de acciones Swing. El ensayo humano del equipo debe comprobar la comodidad del control, la dificultad y la legibilidad en la pantalla de exposición.
 
-Abre Pasillo concurrido con los 600 puntos del primer nivel. Este lanzador solo es para probar;
-el juego normal sigue avanzando al nivel 2 despues de completar el primero y pulsar Enter.
+## Recursos y documentos
+
+La presentación dibuja el pixel art mediante Java2D en una escena de 640 por 400 y usa escalado por vecino más cercano. El atlas de assets documenta el arte original. La ejecución no necesita descargar sprites. Esta versión no incorpora audio.
+
+- docs/ARQUITECTURA.md describe componentes, patrones y relaciones.
+- docs/UML.svg contiene el diagrama de clases.
+- docs/GUIA_EXPOSICION.md organiza la defensa para cuatro integrantes.
+- docs/VALIDACION_FINAL.md identifica las pruebas ejecutadas, sus resultados y sus límites.
+- El informe final desarrolla las diez secciones de la rúbrica.
+
+Las contribuciones originales se conservan en el historial de ramas y sus commits. El estado de esta candidata local y su eventual integración a main debe consultarse en la documentación de validación.
+
+
+## Empaquetado y verificación de red
+
+empaquetar.bat compila las fuentes de producción en un directorio nuevo bajo build y actualiza dist/SupermercadoEnCaos.jar. En Linux o macOS se puede usar bash empaquetar.sh.
+
+Después de compilar las pruebas, el siguiente comando verifica una petición real de demostración. Necesita conexión a Internet y se ejecuta explícitamente.
+
+~~~text
+java -cp build/classes com.supermercado.VerificarApi
+~~~
+
+Las pruebas normales usan transporte aislado y un servidor HTTP local. Las ventanas lanzadas desde PruebasJuan también usan transporte simulado y lo indican en el resultado. El juego normal ejecutado mediante Main o el JAR utiliza la API real.
+
+El informe final vigente está en docs/Informe_Final_SupermercadoEnCaos.docx. El informe parcial se conserva como antecedente de la entrega anterior.

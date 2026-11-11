@@ -1,1 +1,74 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="980" height="700" viewBox="0 0 980 700"><rect width="980" height="700" fill="white"/><rect x="20" y="25" width="285" height="135" fill="#f2f4f1" stroke="#344b46"/><path d="M20,60h285" stroke="#344b46"/><text x="30" y="48" font-family="monospace" font-size="16">Juego</text><text x="30" y="80" font-family="monospace" font-size="16">- nivel: Nivel</text><text x="30" y="103" font-family="monospace" font-size="16">- puntuacion: int</text><text x="30" y="126" font-family="monospace" font-size="16">+ iniciarPartida()</text><rect x="340" y="25" width="285" height="135" fill="#f2f4f1" stroke="#344b46"/><path d="M340,60h285" stroke="#344b46"/><text x="350" y="48" font-family="monospace" font-size="16">Nivel</text><text x="350" y="80" font-family="monospace" font-size="16">- personajes: List&lt;Personaje&gt;</text><text x="350" y="103" font-family="monospace" font-size="16">- productos: List&lt;Producto&gt;</text><text x="350" y="126" font-family="monospace" font-size="16">+ actualizarPersonajes()</text><rect x="660" y="25" width="285" height="135" fill="#f2f4f1" stroke="#344b46"/><path d="M660,60h285" stroke="#344b46"/><text x="670" y="48" font-family="monospace" font-size="16">Personaje abstracta</text><text x="670" y="80" font-family="monospace" font-size="16">- x, y: double</text><text x="670" y="103" font-family="monospace" font-size="16">+ update(): abstract</text><text x="670" y="126" font-family="monospace" font-size="16">+ getBounds()</text><rect x="20" y="260" width="285" height="135" fill="#f2f4f1" stroke="#344b46"/><path d="M20,295h285" stroke="#344b46"/><text x="30" y="283" font-family="monospace" font-size="16">Producto</text><text x="30" y="315" font-family="monospace" font-size="16">- recogido, entregado: boolean</text><text x="30" y="338" font-family="monospace" font-size="16">+ marcarEntregado()</text><rect x="340" y="260" width="285" height="135" fill="#f2f4f1" stroke="#344b46"/><path d="M340,295h285" stroke="#344b46"/><text x="350" y="283" font-family="monospace" font-size="16">Estante</text><text x="350" y="315" font-family="monospace" font-size="16">- recibidos: List&lt;Producto&gt;</text><text x="350" y="338" font-family="monospace" font-size="16">+ recibirProducto(p)</text><rect x="660" y="260" width="285" height="135" fill="#f2f4f1" stroke="#344b46"/><path d="M660,295h285" stroke="#344b46"/><text x="670" y="283" font-family="monospace" font-size="16">Jugador</text><text x="670" y="315" font-family="monospace" font-size="16">- productoEnMano: Producto</text><text x="670" y="338" font-family="monospace" font-size="16">+ update()</text><rect x="340" y="490" width="285" height="135" fill="#f2f4f1" stroke="#344b46"/><path d="M340,525h285" stroke="#344b46"/><text x="350" y="513" font-family="monospace" font-size="16">Obstaculo</text><text x="350" y="545" font-family="monospace" font-size="16">- x, y: double</text><text x="350" y="568" font-family="monospace" font-size="16">+ getBounds()</text><rect x="660" y="490" width="285" height="135" fill="#f2f4f1" stroke="#344b46"/><path d="M660,525h285" stroke="#344b46"/><text x="670" y="513" font-family="monospace" font-size="16">Cliente</text><text x="670" y="545" font-family="monospace" font-size="16">+ update()</text><text x="670" y="568" font-family="monospace" font-size="16">+ cambiarDireccion()</text><polygon points="305,75 313,70 321,75 313,80" stroke="#344b46" fill="#344b46"/><polyline points="305,75 340,75" fill="none" stroke="#344b46"/><text x="345" y="94" font-family="monospace" font-size="13"></text><polygon points="625,105 633,100 641,105 633,110" stroke="#344b46" fill="#344b46"/><polyline points="625,105 660,105" fill="none" stroke="#344b46"/><text x="665" y="124" font-family="monospace" font-size="13"></text><polygon points="355,160 347,155 339,160 347,165" stroke="#344b46" fill="#344b46"/><polyline points="355,160 355,205 180,205 180,260" fill="none" stroke="#344b46"/><text x="185" y="224" font-family="monospace" font-size="13">6 productos</text><polygon points="340,315 332,310 324,315 332,320" stroke="#344b46" fill="white"/><polyline points="340,315 305,315" fill="none" stroke="#344b46"/><text x="310" y="334" font-family="monospace" font-size="13"></text><polyline points="660,365 640,365 640,440 155,440 155,395" fill="none" stroke="#344b46"/><text x="645" y="459" font-family="monospace" font-size="13">0..1 en mano</text><polygon points="800,160 793,174 807,174" stroke="#344b46" fill="white"/><polyline points="800,260 800,160" fill="none" stroke="#344b46"/><text x="805" y="179" font-family="monospace" font-size="13"></text><polygon points="860,160 853,174 867,174" stroke="#344b46" fill="white"/><polyline points="925,490 955,490 955,190 860,190 860,160" fill="none" stroke="#344b46"/><text x="960" y="209" font-family="monospace" font-size="13"></text><polygon points="480,490 473,476 487,476" stroke="#344b46" fill="white"/><polyline points="480,395 480,490" fill="none" stroke="#344b46"/><text x="485" y="509" font-family="monospace" font-size="13"></text><text x="20" y="669" font-family="monospace" font-size="15">Diamante lleno: composicion  |  vacio: agregacion  |  triangulo: herencia</text><text x="20" y="695" font-family="monospace" font-size="15">Asociacion: Jugador conoce Producto. Multiplicidades describen un nivel.</text></svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="1220" height="590" viewBox="0 0 1220 590">
+<defs><marker id="open" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#333"/></marker><marker id="tri" markerWidth="12" markerHeight="12" refX="11" refY="6" orient="auto"><path d="M1 1 L11 6 L1 11 Z" fill="white" stroke="#333"/></marker><marker id="comp" markerWidth="12" markerHeight="10" refX="1" refY="5" orient="auto"><path d="M1 5 L6 1 L11 5 L6 9 Z" fill="#333" stroke="#333"/></marker><marker id="agg" markerWidth="12" markerHeight="10" refX="1" refY="5" orient="auto"><path d="M1 5 L6 1 L11 5 L6 9 Z" fill="white" stroke="#333"/></marker></defs>
+<rect width="1220" height="590" fill="white"/>
+<g font-family="Arial, sans-serif" fill="#161616">
+<rect x="20" y="40" width="260" height="145" fill="#f1f4f2" stroke="#333" stroke-width="2"/>
+<text x="150.0" y="69" text-anchor="middle" font-size="21" font-weight="bold">Juego</text>
+<path d="M20 82 H280" stroke="#333"/>
+<text x="32" y="108" font-size="17">- estadoActual</text>
+<text x="32" y="132" font-size="17">- nivel, puntuacion</text>
+<text x="32" y="156" font-size="17">+ manejarTeclado()</text>
+<rect x="320" y="40" width="260" height="145" fill="#f1f4f2" stroke="#333" stroke-width="2"/>
+<text x="450.0" y="69" text-anchor="middle" font-size="21" font-weight="bold">Nivel</text>
+<path d="M320 82 H580" stroke="#333"/>
+<text x="332" y="108" font-size="17">- personajes, productos</text>
+<text x="332" y="132" font-size="17">- obstaculos, regla</text>
+<text x="332" y="156" font-size="17">+ actualizarPersonajes()</text>
+<rect x="620" y="40" width="260" height="145" fill="#f1f4f2" stroke="#333" stroke-width="2"/>
+<text x="750.0" y="69" text-anchor="middle" font-size="21" font-weight="bold">Personaje abstracta</text>
+<path d="M620 82 H880" stroke="#333"/>
+<text x="632" y="108" font-size="17">- x, y, velocidad</text>
+<text x="632" y="132" font-size="17">+ update() abstracto</text>
+<text x="632" y="156" font-size="17">+ getBounds()</text>
+<rect x="920" y="40" width="280" height="145" fill="#f1f4f2" stroke="#333" stroke-width="2"/>
+<text x="1060.0" y="69" text-anchor="middle" font-size="21" font-weight="bold">Producto</text>
+<path d="M920 82 H1200" stroke="#333"/>
+<text x="932" y="108" font-size="17">- categoria, recogido</text>
+<text x="932" y="132" font-size="17">- entregado</text>
+<text x="932" y="156" font-size="17">+ soltar()</text>
+<rect x="20" y="340" width="260" height="145" fill="#f1f4f2" stroke="#333" stroke-width="2"/>
+<text x="150.0" y="369" text-anchor="middle" font-size="21" font-weight="bold">Obstaculo</text>
+<path d="M20 382 H280" stroke="#333"/>
+<text x="32" y="408" font-size="17">- x, y, ancho, alto</text>
+<text x="32" y="432" font-size="17">+ bloqueaPaso()</text>
+<text x="32" y="456" font-size="17">+ getBounds()</text>
+<rect x="320" y="340" width="260" height="145" fill="#f1f4f2" stroke="#333" stroke-width="2"/>
+<text x="450.0" y="369" text-anchor="middle" font-size="21" font-weight="bold">Estante</text>
+<path d="M320 382 H580" stroke="#333"/>
+<text x="332" y="408" font-size="17">- categoria, recibidos</text>
+<text x="332" y="432" font-size="17">+ recibirProducto()</text>
+<text x="332" y="456" font-size="17">+ aceptaProducto()</text>
+<rect x="620" y="340" width="260" height="145" fill="#f1f4f2" stroke="#333" stroke-width="2"/>
+<text x="750.0" y="369" text-anchor="middle" font-size="21" font-weight="bold">Jugador</text>
+<path d="M620 382 H880" stroke="#333"/>
+<text x="632" y="408" font-size="17">- productoEnMano</text>
+<text x="632" y="432" font-size="17">+ update()</text>
+<text x="632" y="456" font-size="17">+ entregarProducto()</text>
+<rect x="920" y="340" width="280" height="145" fill="#f1f4f2" stroke="#333" stroke-width="2"/>
+<text x="1060.0" y="369" text-anchor="middle" font-size="21" font-weight="bold">Cliente</text>
+<path d="M920 382 H1200" stroke="#333"/>
+<text x="932" y="408" font-size="17">- movimiento, direccion</text>
+<text x="932" y="432" font-size="17">+ update()</text>
+<text x="932" y="456" font-size="17">+ cambiarDireccion()</text>
+<polyline points="280,110 320,110" fill="none" stroke="#333" stroke-width="2" marker-start="url(#comp)"/>
+<rect x="293.6" y="75.0" width="12.8" height="25" fill="white"/>
+<text x="300.0" y="94.0" text-anchor="middle" font-size="18">1</text>
+<polyline points="580,110 620,110" fill="none" stroke="#333" stroke-width="2" marker-start="url(#comp)"/>
+<rect x="580.4" y="75.0" width="39.2" height="25" fill="white"/>
+<text x="600.0" y="94.0" text-anchor="middle" font-size="18">1..*</text>
+<polyline points="450,40 450,12 1060,12 1060,40" fill="none" stroke="#333" stroke-width="2" marker-start="url(#comp)"/>
+<rect x="696.4" y="6.0" width="127.20000000000002" height="25" fill="white"/>
+<text x="760.0" y="25.0" text-anchor="middle" font-size="18">productos 1..*</text>
+<polyline points="400,185 400,245 150,245 150,340" fill="none" stroke="#333" stroke-width="2" marker-start="url(#comp)"/>
+<rect x="192.0" y="216.0" width="136.0" height="25" fill="white"/>
+<text x="260.0" y="235.0" text-anchor="middle" font-size="18">obstaculos 1..*</text>
+<polyline points="320,410 280,410" fill="none" stroke="#333" stroke-width="2" marker-end="url(#tri)"/>
+<polyline points="750,340 750,185" fill="none" stroke="#333" stroke-width="2" marker-end="url(#tri)"/>
+<polyline points="1060,340 1060,265 810,265 810,185" fill="none" stroke="#333" stroke-width="2" marker-end="url(#tri)"/>
+<polyline points="880,450 900,450 900,215 1155,215 1155,185" fill="none" stroke="#333" stroke-width="2" marker-end="url(#open)"/>
+<rect x="980.2" y="186.0" width="109.60000000000001" height="25" fill="white"/>
+<text x="1035.0" y="205.0" text-anchor="middle" font-size="18">en mano 0..1</text>
+<polyline points="450,485 450,550 1210,550 1210,113 1200,113" fill="none" stroke="#333" stroke-width="2" marker-start="url(#agg)"/>
+<rect x="746.4" y="521.0" width="127.20000000000002" height="25" fill="white"/>
+<text x="810.0" y="540.0" text-anchor="middle" font-size="18">recibidos 0..*</text>
+</g></svg>
