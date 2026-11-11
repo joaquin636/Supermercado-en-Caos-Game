@@ -117,3 +117,19 @@ La recomendación técnica es revisar la candidata conjunta y sus diferencias co
 - Ejecutar VerificarApi con conexión y mostrar la respuesta real como servicio de demostración.
 - Revisar el historial con autores y comprender las correcciones asumidas por cada integrante.
 - Ensayar la guía oral y responder preguntas sobre patrones, relaciones POO y asincronía.
+
+
+## Cierre de verificación de entrega
+
+Se clonó localmente el commit de entrega 018d36d49da51ce40e8ad4e6687fc0bc755b37ed en verificacion-clonada. La copia comenzó sin build ni clases precompiladas. La compilación de sources.txt y tests.txt para Java 17 terminó sin advertencias y toda la suite pasó, incluidos los seis niveles y los mismos contadores indicados anteriormente.
+
+Se abrió el JAR de esa copia usando exclusivamente dist/SupermercadoEnCaos.jar como classpath de producción. La comprobación confirmó las seis configuraciones, ventana visible, inicio mediante Enter, desplazamiento, reloj, pausa al perder foco y rechazo de E durante la pausa. La ventana se cerró al terminar.
+
+Las 40 clases de producción del JAR coinciden byte por byte con las obtenidas en la compilación limpia. Todas tienen versión de bytecode 61, correspondiente a Java 17. El JAR excluye las clases de pruebas y los lanzadores de demostración.
+
+SHA256 del JAR
+81c45c021ecd7163db10a3717b339328bc5d26b60ab1042864a81e7d4ad7e4a1
+
+Las capturas nuevas de nivel 5 y final de campaña proceden de la copia limpia. La captura del final muestra explícitamente Transporte simulado para pruebas. Es evidencia de la campaña y del panel, mientras que la aceptación HTTP real se acredita con la verificación externa separada de este documento.
+
+Recomendación de cierre. La candidata está preparada para revisión del equipo y autorización de publicación o integración. La revisión técnica conjunta pasó. Permanecen la prueba humana de dificultad, el ensayo y la evaluación oral, además de la aprobación del responsable para cualquier cambio remoto.
